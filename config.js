@@ -22,6 +22,36 @@ window.DULCENATA_CONFIG = {
   banner: '',               // vacío = usa banner.jpg
   categorias: '["Desayunos sorpresa","Anchetas","Detalles dulces","Globos","Flores","Peluches"]',
 
+  // Datos que ve el cliente al elegir cada medio de pago (se editan en el panel > Ajustes)
+  pagosInfo: {
+    'Nequi': 'Nequi 300 000 0000 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
+    'Daviplata': 'Daviplata 300 000 0000 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
+    'Bancolombia': 'Cuenta de ahorros Bancolombia 000-000000-00 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
+    'Efectivo': 'Pagas al recibir. Cuéntanos con cuánto vas a pagar para llevar las vueltas.'
+  },
+
+  // Frases sugeridas para la tarjeta (se editan en el panel > Mensajes)
+  mensajes: [
+    { cat: 'Amor', texto: 'Eres mi lugar favorito en el mundo. Te amo hoy y siempre. 💖' },
+    { cat: 'Amor', texto: 'Contigo cada día es un regalo. Gracias por existir en mi vida.' },
+    { cat: 'Amor', texto: 'No necesito una fecha especial para decirte lo mucho que te quiero.' },
+    { cat: 'Cumpleaños', texto: '¡Feliz cumpleaños! Que este nuevo año te traiga todo lo que sueñas. 🎉' },
+    { cat: 'Cumpleaños', texto: 'Hoy celebramos a una persona maravillosa: ¡tú! Feliz día.' },
+    { cat: 'Cumpleaños', texto: 'Que la vida te siga regalando motivos para sonreír. ¡Feliz cumpleaños!' },
+    { cat: 'Aniversario', texto: 'Un año más eligiéndonos. Gracias por cada momento a mi lado. Feliz aniversario.' },
+    { cat: 'Aniversario', texto: 'Contigo el tiempo vuela y el amor crece. ¡Feliz aniversario, mi amor!' },
+    { cat: 'Mamá', texto: 'Gracias por tu amor infinito, mamá. Eres mi ejemplo y mi mayor bendición.' },
+    { cat: 'Mamá', texto: 'Para la mujer que me lo dio todo: te amo, mamá.' },
+    { cat: 'Papá', texto: 'Gracias por ser mi guía y mi héroe. Te quiero mucho, papá.' },
+    { cat: 'Amistad', texto: 'Los amigos son la familia que uno escoge. Gracias por estar siempre.' },
+    { cat: 'Amistad', texto: 'Un detalle pequeño para alguien que hace mi vida más bonita.' },
+    { cat: 'Gracias', texto: 'Gracias por tanto. Este detalle es solo una forma de decirte lo especial que eres.' },
+    { cat: 'Pronta recuperación', texto: 'Te mando un abrazo enorme y mucha energía. ¡Que te recuperes pronto!' },
+    { cat: 'Sorpresa', texto: 'Porque sí, porque te lo mereces y porque quería sacarte una sonrisa. 😊' },
+    { cat: 'Sorpresa', texto: 'Hoy es un buen día para recordarte lo increíble que eres.' },
+    { cat: 'Perdón', texto: 'Lo siento. Eres muy importante para mí y quiero arreglar las cosas.' }
+  ],
+
   // Mensajes al cliente. Puedes usar: {cliente} {pedido} {entrega} {recibe} {link} {tienda}
   msgConfirmado:  '¡Hola {cliente}! 💝 Tu pedido *{pedido}* en {tienda} está *confirmado*.\n📅 Entrega: {entrega}\n\nPuedes seguirlo aquí: {link}',
   msgPreparacion: '¡Hola {cliente}! 🎀 Ya estamos *preparando* tu pedido *{pedido}* con mucho amor.\n\nSíguelo aquí: {link}',

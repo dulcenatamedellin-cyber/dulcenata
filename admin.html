@@ -163,7 +163,21 @@ label.c small{color:var(--muted);font-weight:600}
 .banner-prev{width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:var(--rosa-suave)}
 .vars{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin:0 0 12px}
 .vars code{background:var(--rosa-suave);color:var(--rosa-hondo);padding:1px 6px;border-radius:6px;font-weight:700}
+/* Mensajes de tarjeta */
+.msg-form{display:grid;grid-template-columns:200px 1fr auto;gap:8px;align-items:start;margin-bottom:12px}
+.msg-form select,.msg-form input,.msg-form textarea{padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);outline:none;width:100%;min-width:0}
+.msg-form textarea{resize:vertical}
+.chips-f{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chips-f button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:5px 12px;font-weight:700;font-size:.85rem;color:var(--muted)}
+.chips-f button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
+.msg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line)}
+.msg:last-child{border-bottom:0}
+.msg p{margin:0}
+.msg small{color:var(--rosa);font-weight:800;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
+.msg textarea{width:100%;padding:8px 10px;border-radius:10px;border:2px solid var(--rosa);background:var(--bg);outline:none;resize:vertical}
 @media (max-width:760px){
+  .msg-form{grid-template-columns:1fr}
+  .msg{grid-template-columns:1fr}
   .cifras{grid-template-columns:repeat(2,1fr)}
   .fila{grid-template-columns:56px minmax(0,1fr) auto}
   .fila .acc{grid-column:1/-1;justify-content:flex-start}
@@ -210,6 +224,7 @@ label.c small{color:var(--muted);font-weight:600}
     <button class="tab on" data-tab="productos">Productos</button>
     <button class="tab" data-tab="pedidos">Pedidos <span class="n" id="nPend" hidden>0</span></button>
     <button class="tab" data-tab="categorias">Categorías</button>
+    <button class="tab" data-tab="mensajes">Mensajes tarjeta</button>
     <button class="tab" data-tab="ajustes">Ajustes y enlaces</button>
   </div></nav>
 
@@ -241,6 +256,21 @@ label.c small{color:var(--muted);font-weight:600}
       <div class="lista" id="listaCats"></div>
     </section>
 
+    <!-- MENSAJES DE TARJETA -->
+    <section id="tMensajes" hidden>
+      <p class="ayuda">Estas frases le aparecen al cliente al hacer el pedido para que elija la de su tarjeta. También puede escribir la suya.</p>
+      <form class="msg-form" id="fMsg">
+        <div>
+          <select id="msgCat" aria-label="Categoría del mensaje"></select>
+          <input id="msgCatNueva" placeholder="Nombre de la categoría" maxlength="30" hidden style="margin-top:6px">
+        </div>
+        <textarea id="msgTexto" rows="2" maxlength="300" required placeholder="Escribe la frase. Ej: Eres mi lugar favorito en el mundo 💖" aria-label="Texto del mensaje"></textarea>
+        <button class="btn btn-rosa">+ Agregar</button>
+      </form>
+      <div class="chips-f" id="msgFiltro"></div>
+      <div class="lista" id="listaMsg"></div>
+    </section>
+
     <!-- PEDIDOS -->
     <section id="tPedidos" hidden>
       <div class="herr">
@@ -266,6 +296,10 @@ label.c small{color:var(--muted);font-weight:600}
           <label class="c full">Horario<input id="aHorario"></label>
           <label class="c full">Nota de domicilio<input id="aDomicilio"></label>
         </div>
+
+        <h3 class="seccion">Datos para pagar</h3>
+        <p class="ayuda">Lo que ve el cliente al elegir cada medio de pago: número de cuenta, a nombre de quién, etc. Se crea un campo por cada medio que escribas arriba en "Medios de pago".</p>
+        <div class="grid2" id="pagosInfoBox"></div>
 
         <h3 class="seccion">Mensajes para el cliente</h3>
         <p class="ayuda">Se envían por WhatsApp desde cada pedido con el botón verde. Puedes cambiarlos a tu gusto.</p>
@@ -392,7 +426,7 @@ label.c small{color:var(--muted);font-weight:600}
     DATA = await DN.adminDatos(PIN);
     pintarTodo();
   }
-  function pintarTodo(){ pintarCifras(); pintarCats(); pintarListaCats(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
+  function pintarTodo(){ pintarCifras(); pintarCats(); pintarListaCats(); pintarMensajes(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
 
   // ---------- Cifras ----------
   function pintarCifras(){
@@ -596,6 +630,65 @@ label.c small{color:var(--muted);font-weight:600}
     catch(err){ p.estado = prev; pintarTodo(); toast('No se guardó: ' + err.message); }
   }
 
+  // ---------- Mensajes de tarjeta ----------
+  let filtroMsg = '', editMsg = -1, borrarMsg = -1;
+  const MSGS = () => DN.mensajes(DATA.config);
+  const catsMsg = () => [...new Set(MSGS().map(m => m.cat || 'Otros'))];
+  async function guardarMsgs(lista){
+    const prev = DATA.config.mensajes;
+    DATA.config.mensajes = JSON.stringify(lista);
+    try { await DN.guardarConfig(PIN, { mensajes: DATA.config.mensajes }); }
+    catch(err){ DATA.config.mensajes = prev; throw err; }
+  }
+  function pintarMensajes(){
+    const M = MSGS(), cats = catsMsg();
+    const sel = $('#msgCat'), v = sel.value;
+    sel.innerHTML = cats.map(c => `<option ${c===(v||filtroMsg)?'selected':''}>${esc(c)}</option>`).join('') + '<option value="__nueva">＋ Nueva categoría…</option>';
+    if (sel.value === '__nueva' && cats.length) sel.value = cats[0];
+    $('#msgCatNueva').hidden = sel.value !== '__nueva';
+    $('#msgFiltro').innerHTML = `<button class="${!filtroMsg?'on':''}" data-filmsg="">Todas · ${M.length}</button>` +
+      cats.map(c => `<button class="${c===filtroMsg?'on':''}" data-filmsg="${esc(c)}">${esc(c)} · ${M.filter(m=>(m.cat||'Otros')===c).length}</button>`).join('');
+    const lista = M.map((m,i)=>({m,i})).filter(x => !filtroMsg || (x.m.cat||'Otros') === filtroMsg);
+    if (!lista.length){ $('#listaMsg').innerHTML = '<div class="vacio">Aún no hay mensajes. Agrega el primero arriba.</div>'; return; }
+    $('#listaMsg').innerHTML = lista.map(({m,i}) => `<div class="msg">
+      <div style="min-width:0"><small>${esc(m.cat||'Otros')}</small>
+        ${editMsg===i ? `<textarea id="msgEdit" rows="3" maxlength="300">${esc(m.texto)}</textarea>` : `<p>${esc(m.texto)}</p>`}</div>
+      <div class="acc" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
+        ${editMsg===i ? `<button class="btn btn-rosa btn-sm" data-msgok="${i}">Guardar</button><button class="btn btn-borde btn-sm" data-msgno>Cancelar</button>`
+        : borrarMsg===i ? `<span class="confirma">¿Eliminar? <button class="btn btn-peligro btn-sm" data-msgdel="${i}">Sí</button><button class="btn btn-borde btn-sm" data-msgno>No</button></span>`
+        : `<button class="btn btn-borde btn-sm" data-msgedit="${i}">Editar</button><button class="btn btn-borde btn-sm" data-msgpreg="${i}" style="color:var(--bad)">Eliminar</button>`}
+      </div></div>`).join('');
+    if (editMsg >= 0 && $('#msgEdit')) $('#msgEdit').focus();
+  }
+  $('#msgCat').addEventListener('change', e => { $('#msgCatNueva').hidden = e.target.value !== '__nueva'; if (e.target.value === '__nueva') $('#msgCatNueva').focus(); });
+  $('#fMsg').addEventListener('submit', async e => {
+    e.preventDefault();
+    const cat = $('#msgCat').value === '__nueva' ? $('#msgCatNueva').value.trim() : $('#msgCat').value;
+    const texto = $('#msgTexto').value.trim();
+    if (!cat) { toast('Escribe el nombre de la categoría'); return; }
+    if (!texto) return;
+    try { await guardarMsgs([...MSGS(), { cat, texto }]); $('#msgTexto').value=''; $('#msgCatNueva').value=''; filtroMsg = cat; pintarMensajes(); $('#msgCat').value = cat; $('#msgCatNueva').hidden = true; toast('Mensaje agregado'); }
+    catch(err){ toast('No se guardó: ' + err.message); }
+  });
+  async function accionMensaje(d){
+    if (d.filmsg !== undefined){ filtroMsg = d.filmsg; editMsg = borrarMsg = -1; pintarMensajes(); return true; }
+    if (d.msgedit !== undefined){ editMsg = Number(d.msgedit); borrarMsg = -1; pintarMensajes(); return true; }
+    if (d.msgpreg !== undefined){ borrarMsg = Number(d.msgpreg); editMsg = -1; pintarMensajes(); return true; }
+    if (d.msgno !== undefined){ editMsg = borrarMsg = -1; pintarMensajes(); return true; }
+    if (d.msgok !== undefined){
+      const M = MSGS(), t = ($('#msgEdit').value||'').trim(); if (!t) return true;
+      M[Number(d.msgok)].texto = t;
+      try { await guardarMsgs(M); editMsg = -1; pintarMensajes(); toast('Mensaje actualizado'); } catch(err){ toast('No se guardó'); }
+      return true;
+    }
+    if (d.msgdel !== undefined){
+      const M = MSGS(); M.splice(Number(d.msgdel),1);
+      try { await guardarMsgs(M); borrarMsg = -1; if (filtroMsg && !M.some(m=>(m.cat||'Otros')===filtroMsg)) filtroMsg=''; pintarMensajes(); toast('Mensaje eliminado'); } catch(err){ toast('No se eliminó'); }
+      return true;
+    }
+    return false;
+  }
+
   // ---------- Pedidos ----------
   function textoCliente(p, estado){
     const tpl = DATA.config[MSG[estado] || 'msgConfirmado'] || '';
@@ -705,9 +798,19 @@ label.c small{color:var(--muted);font-weight:600}
   // ---------- Ajustes ----------
   const CAMPOS = ['nombre','eslogan','whatsapp','instagram','ciudad','pagos','horario','domicilio','msgConfirmado','msgPreparacion','msgCamino','msgEntregado','msgCancelado'];
   const idCampo = k => '#a' + k[0].toUpperCase() + k.slice(1);
+  function pintarPagosInfo(){
+    const info = DN.pagosInfo(DATA.config);
+    const actuales = {}; document.querySelectorAll('[data-pinfo]').forEach(el => actuales[el.dataset.pinfo] = el.value);
+    const medios = $('#aPagos').value.split(',').map(x=>x.trim()).filter(Boolean);
+    $('#pagosInfoBox').innerHTML = medios.map(m => `<label class="c">${esc(m)}<textarea rows="2" data-pinfo="${esc(m)}" placeholder="${DN.esEfectivo(m) ? 'Ej: Pagas al recibir. Dinos con cuánto pagas para llevar las vueltas.' : 'Ej: Nequi 300 123 4567 a nombre de …'}">${esc(actuales[m] ?? info[m] ?? '')}</textarea></label>`).join('')
+      || '<p class="ayuda">Escribe primero los medios de pago arriba.</p>';
+  }
+  $('#aPagos').addEventListener('input', pintarPagosInfo);
   function pintarAjustes(){
     const c = DATA.config;
     CAMPOS.forEach(k => { $(idCampo(k)).value = c[k] || ''; });
+    document.querySelectorAll('[data-pinfo]').forEach(el => el.remove());
+    pintarPagosInfo();
     $('#bannerPrev').src = c.banner || 'banner.jpg';
     const link = DN.base(), nom = c.nombre || 'Dulcenata';
     $('#linkTienda').value = link;
@@ -718,6 +821,8 @@ label.c small{color:var(--muted);font-weight:600}
     e.preventDefault();
     const cfg = {}; CAMPOS.forEach(k => cfg[k] = $(idCampo(k)).value.trim());
     cfg.whatsapp = cfg.whatsapp.replace(/\D/g,''); cfg.instagram = cfg.instagram.replace('@','');
+    const pinfo = {}; document.querySelectorAll('[data-pinfo]').forEach(el => pinfo[el.dataset.pinfo] = el.value.trim());
+    cfg.pagosInfo = JSON.stringify(pinfo);
     const btn = $('#btnAjustes'); ocupado(btn, true, 'Guardando…');
     try { await DN.guardarConfig(PIN, cfg); DATA.config = Object.assign({}, DATA.config, cfg); pintarAjustes(); toast('Ajustes guardados'); }
     catch(err){ toast('No se guardó: ' + err.message); }
@@ -746,13 +851,14 @@ label.c small{color:var(--muted);font-weight:600}
     const d = t.dataset;
     if (d.tab){
       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
-      ['productos','pedidos','categorias','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
+      ['productos','pedidos','categorias','mensajes','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
       return;
     }
     if (d.confirmar){ cambiarEstadoPedido(d.confirmar, 'Confirmado', false); return; } // el enlace abre WhatsApp solo
     if (d.aviso) return;
     if (d.enviarfoto){ enviarFoto(d.enviarfoto); return; }
     if (await accionCategoria(d)) return;
+    if (await accionMensaje(d)) return;
     if (t.id==='nuevo') return abrirProducto(null);
     if (d.editar) return abrirProducto(DATA.productos.find(x=>x.id===d.editar));
     if (d.dup){ const o = DATA.productos.find(x=>x.id===d.dup); abrirProducto(Object.assign({}, o, { nombre: o.nombre + ' (copia)' })); editId = null; $('#tituloProd').textContent='Nuevo producto (copia)'; return; }

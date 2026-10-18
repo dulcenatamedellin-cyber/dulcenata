@@ -81,6 +81,19 @@
       return base;
     },
 
+    // Frases para tarjeta [{cat, texto}] y datos de pago {medio: texto}. Aceptan texto JSON o lista
+    mensajes(config) {
+      let m = config.mensajes;
+      if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { m = []; } }
+      return Array.isArray(m) ? m.filter(x => x && x.texto) : [];
+    },
+    pagosInfo(config) {
+      let m = config.pagosInfo;
+      if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { m = {}; } }
+      return m && typeof m === 'object' ? m : {};
+    },
+    esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
+
     async tienda() {
       if (DEMO) return { config: mergeConfig(demoDb.config), productos: demoDb.productos.slice() };
       const d = await get({ action: 'tienda' });
