@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mi pedido Dulcenata</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="light only">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#d81b70">
+<link rel="icon" href="logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: una tarjeta centrada tipo recibo — estado actual arriba, línea de tiempo, foto de entrega, detalle. */
+:root{
+  --rosa:#d81b70; --rosa-hondo:#9c1150; --rosa-suave:#fde3ee; --sol:#ffd60a;
+  --bg:#fff8fb; --card:#ffffff; --fg:#2b1420; --muted:#7c5b6b; --line:#f2dbe6; --ok:#15803d; --wa:#25d366;
+  --f-display:'Fraunces', Georgia, serif; --f-body:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html{color-scheme:light only}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);line-height:1.5;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+img{max-width:100%;display:block}
+h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
+.caja{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.marca{display:flex;align-items:center;gap:10px;justify-content:center;text-decoration:none;color:inherit}
+.marca img{width:52px;height:52px;border-radius:50%;box-shadow:0 0 0 3px var(--sol)}
+.marca b{font-family:var(--f-display);font-style:italic;font-size:1.5rem;color:var(--rosa)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:22px}
+.estado{text-align:center}
+.estado .ico{font-size:2.6rem}
+.estado small{color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;font-size:.75rem}
+.estado h1{font-size:1.9rem;color:var(--rosa);margin:4px 0}
+.estado p{margin:0;color:var(--muted)}
+.linea{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.linea li{display:grid;grid-template-columns:28px 1fr auto;gap:12px;align-items:start;position:relative;padding-bottom:18px}
+.linea li:last-child{padding-bottom:0}
+.linea li::before{content:"";position:absolute;left:13px;top:26px;bottom:0;width:2px;background:var(--line)}
+.linea li:last-child::before{display:none}
+.linea .p{width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:.85rem;font-weight:800;color:#fff;z-index:1}
+.linea li.hecho .p{background:var(--rosa);border-color:var(--rosa)}
+.linea li.hecho::before{background:var(--rosa)}
+.linea li.actual .p{box-shadow:0 0 0 5px var(--rosa-suave)}
+.linea b{display:block}
+.linea li:not(.hecho) b{color:var(--muted);font-weight:600}
+.linea time{font-size:.8rem;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.foto h2{font-size:1.3rem;margin-bottom:10px}
+.foto img{width:100%;border-radius:16px}
+.det pre{font-family:inherit;white-space:pre-wrap;margin:8px 0 0;font-size:.95rem}
+.det .fila{display:flex;justify-content:space-between;gap:10px;font-size:.92rem;padding:6px 0;border-bottom:1px dashed var(--line)}
+.det .fila:last-child{border-bottom:0}
+.det .fila span{color:var(--muted)}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:14px 22px;font-weight:800;text-decoration:none;background:var(--wa);color:#073b1d}
+.btn.sec{background:transparent;border:2px solid var(--rosa);color:var(--rosa)}
+.form{display:flex;gap:8px}
+.form input{flex:1;min-width:0;padding:12px 14px;border-radius:14px;border:2px solid var(--line);background:var(--bg);font:inherit;color:inherit;font-size:1.15rem;letter-spacing:.04em}
+.form button{border:0;border-radius:14px;background:var(--rosa);color:#fff;font-weight:800;padding:0 18px;font:inherit;cursor:pointer}
+.demo{background:var(--sol);color:#2b1420;text-align:center;font-size:.85rem;font-weight:700;padding:6px 12px;border-radius:12px}
+.otros h2{font-size:1.15rem;margin-bottom:8px}
+.otro{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;font:inherit;color:inherit;cursor:pointer;text-align:left;margin-top:8px}
+.otro small{color:var(--muted)}
+.otro .pill{font-size:.75rem;font-weight:800;background:var(--rosa-suave);color:var(--rosa-hondo);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.cambiar{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;cursor:pointer;align-self:center}
+</style>
+</head>
+<body>
+<div class="caja">
+  <a class="marca" href="index.html"><img src="logo.jpg" alt=""><b id="nom">Dulcenata</b></a>
+  <div class="demo" id="avisoDemo" hidden>Demostración · prueba con el celular 3109876543</div>
+
+  <div class="card" id="buscar" hidden>
+    <h2 style="font-size:1.3rem;margin-bottom:6px">Consulta tu pedido</h2>
+    <p style="margin:0 0 12px;color:var(--muted)">Escribe el número de celular con el que hiciste el pedido.</p>
+    <form class="form" id="fBuscar"><input id="qTel" type="tel" inputmode="numeric" autocomplete="tel" placeholder="300 123 4567" aria-label="Número de celular" required><button>Ver</button></form>
+    <p id="err" style="color:var(--rosa);font-weight:700;margin:10px 0 0" hidden></p>
+  </div>
+
+  <div id="vista" hidden>
+    <div class="caja">
+      <div class="card estado">
+        <div class="ico" id="ico">🎁</div>
+        <small id="numero"></small>
+        <h1 id="estado"></h1>
+        <p id="frase"></p>
+      </div>
+      <div class="card foto" id="cajaFoto" hidden>
+        <h2>📸 Así quedó la entrega</h2>
+        <img id="foto" alt="Foto de la entrega del pedido">
+      </div>
+      <div class="card"><ol class="linea" id="linea"></ol></div>
+      <div class="card det" id="det"></div>
+      <div class="card otros" id="otros" hidden></div>
+      <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Escribir a Dulcenata por WhatsApp</a>
+      <a class="btn sec" href="index.html">Ver más regalos</a>
+      <button class="cambiar" id="cambiar" type="button">Consultar otro número</button>
+    </div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s), esc = DN.esc;
+  const PASOS = ['Pendiente','Confirmado','En preparación','En camino','Entregado'];
+  const INFO = {
+    'Pendiente':      ['📝','Recibimos tu pedido. En breve lo confirmamos por WhatsApp.'],
+    'Confirmado':     ['💝','¡Tu pedido está confirmado! Lo tendremos listo para la fecha de entrega.'],
+    'En preparación': ['🎀','Estamos armando tu regalo con mucho amor.'],
+    'En camino':      ['🚗','Tu regalo va en camino.'],
+    'Entregado':      ['✅','¡Tu regalo fue entregado! Gracias por elegirnos.'],
+    'Cancelado':      ['❌','Este pedido fue cancelado. Escríbenos si tienes preguntas.']
+  };
+  if (DN.DEMO) $('#avisoDemo').hidden = false;
+  const hora = t => t ? new Date(t).toLocaleString('es-CO',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}) : '';
+  const corto = t => t ? new Date(t).toLocaleDateString('es-CO',{day:'numeric',month:'short'}) : '';
+  const bonito = c => c.length === 10 ? c.replace(/(\d{3})(\d{3})(\d{4})/, '$1 $2 $3') : c;
+  let DATOS = null, tel = '';
+
+  function mostrarBuscar(msg){
+    $('#vista').hidden = true; $('#buscar').hidden = false;
+    $('#err').textContent = msg || ''; $('#err').hidden = !msg;
+    setTimeout(()=>$('#qTel').focus(), 50);
+  }
+
+  async function cargar(t){
+    tel = DN.cel(t);
+    if (!tel){ mostrarBuscar(); return; }
+    try { DATOS = await DN.seguimiento(tel); mostrar(0); }
+    catch(e){ mostrarBuscar(e.message || 'No encontramos pedidos con ese número.'); }
+  }
+
+  function mostrar(i){
+    const p = DATOS.pedidos[i], c = DATOS.config, info = INFO[p.estado] || INFO.Pendiente;
+    $('#buscar').hidden = true; $('#vista').hidden = false;
+    $('#nom').textContent = c.nombre || 'Dulcenata';
+    $('#ico').textContent = info[0];
+    $('#numero').textContent = 'Pedido del ' + corto(p.fecha) + ' · ' + bonito(tel);
+    $('#estado').textContent = p.estado;
+    $('#frase').textContent = (p.cliente ? 'Hola ' + p.cliente + '. ' : '') + info[1];
+    if (p.fotoEntrega){ $('#foto').src = p.fotoEntrega; $('#cajaFoto').hidden = false; } else $('#cajaFoto').hidden = true;
+    const cuando = {}; (p.historial||[]).forEach(h => cuando[h.e] = h.t);
+    const pasos = p.estado === 'Cancelado' ? ['Pendiente','Cancelado'] : PASOS;
+    const actual = pasos.indexOf(p.estado);
+    $('#linea').innerHTML = pasos.map((s,k) => `<li class="${k<=actual?'hecho':''} ${k===actual?'actual':''}">
+      <span class="p">${k<=actual?'✓':''}</span><b>${esc(s)}</b><time>${esc(hora(cuando[s]))}</time></li>`).join('');
+    $('#det').innerHTML = `<b>Tu pedido</b><pre>${esc(p.productos)}</pre>
+      <div style="margin-top:10px">
+      ${p.recibe?`<div class="fila"><span>Para</span><b>${esc(p.recibe)}</b></div>`:''}
+      ${p.fechaEntrega?`<div class="fila"><span>Entrega</span><b>${esc(p.fechaEntrega)}</b></div>`:''}
+      <div class="fila"><span>Total productos</span><b>${DN.pesos(p.total)}</b></div>
+      <div class="fila"><span>Código</span><b>${esc(p.id)}</b></div></div>`;
+    const otros = DATOS.pedidos.map((o,k)=>({o,k})).filter(x => x.k !== i);
+    $('#otros').hidden = !otros.length;
+    $('#otros').innerHTML = '<h2>Tus otros pedidos</h2>' + otros.map(({o,k}) => `<button class="otro" data-i="${k}">
+      <span><b>${esc(String(o.productos||'').split('\n')[0])}</b><br><small>${esc(corto(o.fecha))}</small></span><span class="pill">${esc(o.estado)}</span></button>`).join('');
+    $('#wa').href = 'https://wa.me/' + String(c.whatsapp||'').replace(/\D/g,'') + '?text=' + encodeURIComponent('Hola, quiero preguntar por mi pedido (' + p.id + ', celular ' + bonito(tel) + ')');
+    document.title = 'Mi pedido · ' + p.estado;
+    window.scrollTo(0,0);
+  }
+
+  $('#otros').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) mostrar(Number(b.dataset.i)); });
+  $('#fBuscar').addEventListener('submit', e => { e.preventDefault(); const c = DN.cel($('#qTel').value); if (location.hash.slice(1) === c) cargar(c); else location.hash = c; });
+  $('#cambiar').addEventListener('click', () => { $('#qTel').value = ''; mostrarBuscar(); });
+  window.addEventListener('hashchange', () => cargar(location.hash.slice(1)));
+  cargar(location.hash.slice(1));
+  setInterval(() => { if (tel && !$('#vista').hidden) DN.seguimiento(tel).then(d => { DATOS = d; mostrar(0); }).catch(()=>{}); }, 90000);
+})();
+</script>
+</body>
+</html>
