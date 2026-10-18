@@ -159,6 +159,9 @@ label.c small{color:var(--muted);font-weight:600}
 .pasos-ped span.ok{background:var(--rosa)}
 .pasos-ped small{flex:none;margin-left:8px;color:var(--muted);font-weight:700;font-size:.75rem}
 .espera{color:var(--muted);font-size:.8rem}
+.mensajero{display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:var(--rosa-suave);border-radius:14px;padding:8px}
+.mensajero > .btn:first-child{flex:1;min-width:200px}
+.link-on{font-size:.8rem;font-weight:700;color:var(--ok)}
 .ped select{font-size:.8rem}
 .btn-wa.pulso{animation:pulso 1.2s ease-in-out 3}
 @keyframes pulso{50%{box-shadow:0 0 0 6px rgba(37,211,102,.35)}}
@@ -170,6 +173,11 @@ label.c small{color:var(--muted);font-weight:600}
 .banner-prev{width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:var(--rosa-suave)}
 .vars{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin:0 0 12px}
 .vars code{background:var(--rosa-suave);color:var(--rosa-hondo);padding:1px 6px;border-radius:6px;font-weight:700}
+/* Zonas */
+.zonas{display:flex;flex-direction:column;gap:6px}
+.zona{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:6px;align-items:center}
+.zona input{padding:9px 11px;border-radius:10px;border:2px solid var(--line);background:var(--bg);width:100%;min-width:0}
+.zona button{border:0;background:var(--bad-bg);color:var(--bad);border-radius:10px;width:36px;height:36px;font-weight:800}
 /* Ventas */
 .cifra.link{cursor:pointer;transition:border-color .15s}
 .cifra.link:hover{border-color:var(--rosa)}
@@ -358,6 +366,11 @@ table.t tr:last-child td{border-bottom:0}
           <label class="c full">Nota de domicilio<input id="aDomicilio"></label>
         </div>
 
+        <h3 class="seccion">Zonas de domicilio</h3>
+        <p class="ayuda">El cliente elige su zona al hacer el pedido y ve el total con domicilio. Si su zona no está, elige "Otra zona" y tú le confirmas el valor.</p>
+        <div id="zonasBox" class="zonas"></div>
+        <button type="button" class="btn btn-borde btn-sm" id="addZona" style="margin-top:8px">+ Agregar zona</button>
+
         <h3 class="seccion">Datos para pagar</h3>
         <p class="ayuda">Lo que ve el cliente al elegir cada medio de pago: número de cuenta, a nombre de quién, etc. Se crea un campo por cada medio que escribas arriba en "Medios de pago".</p>
         <div class="grid2" id="pagosInfoBox"></div>
@@ -390,10 +403,6 @@ table.t tr:last-child td{border-bottom:0}
         <h3>Enlace de tu tienda</h3>
         <p class="ayuda">Este es el enlace que pones en WhatsApp Business, en la biografía de Instagram y en tus estados.</p>
         <div class="copiar"><input class="c" id="linkTienda" readonly style="padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--bg)"><button class="btn btn-rosa" data-copiar="linkTienda">Copiar</button></div>
-
-        <h3 class="seccion">Enlace para el mensajero</h3>
-        <p class="ayuda">Envíaselo al mensajero. Entra con su propia clave (está en Code.gs como MENSAJERO_PIN), ve los pedidos por entregar y sube la foto al entregar.</p>
-        <div class="copiar"><input class="c" id="linkMensajero" readonly style="padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--bg)"><button class="btn btn-rosa" data-copiar="linkMensajero">Copiar</button></div>
 
         <h3 class="seccion">Mensaje de bienvenida para WhatsApp Business</h3>
         <p class="ayuda">WhatsApp Business › Herramientas para la empresa › Mensaje de bienvenida. Pega este texto:</p>
@@ -748,7 +757,7 @@ table.t tr:last-child td{border-bottom:0}
     pintarSonido();
   });
   document.addEventListener('pointerdown', () => { if (sonidoOn) DN.desbloquearSonido(); }, { once: true });
-  const firmaPed = L => JSON.stringify(L.map(p => [p.id, p.estado, p.fotoEntrega, p.comprobante, p.domicilio]));
+  const firmaPed = L => JSON.stringify(L.map(p => [p.id, p.estado, p.fotoEntrega, p.comprobante, p.domicilio, p.tokenEntrega]));
   function titulo(){ const n = DATA.pedidos.filter(p=>p.estado==='Pendiente').length; document.title = (n ? '(' + n + ') ' : '') + 'Panel Dulcenata'; }
   async function refrescar(){
     if (!PIN || document.hidden || $('#vApp').hidden) return;
@@ -763,6 +772,11 @@ table.t tr:last-child td{border-bottom:0}
         nuevosIds = new Set(nuevos.map(p=>p.id).concat(entregados.map(p=>p.id)));
         if (!editando) pintarPedidos();
         pintarCifras(); if (!$('#tVentas').hidden) pintarVentas(); titulo();
+      }
+      const salieron = d.pedidos.filter(p => { const a = DATA.pedidos.find(x=>x.id===p.id); return a && a.estado !== 'En camino' && p.estado === 'En camino' && (p.historial||[]).slice(-1)[0]?.por === 'mensajero'; });
+      if (salieron.length && !entregados.length) {
+        if (sonidoOn) DN.sonar('estado');
+        toast('🛵 El mensajero salió con ' + salieron.map(p=>p.id).join(', ') + '. Avísale al cliente que va en camino');
       }
       if (entregados.length) {
         if (sonidoOn) DN.sonar('estado');
@@ -860,11 +874,13 @@ table.t tr:last-child td{border-bottom:0}
     const paso = FLUJO.indexOf(p.estado);
     if (paso >= 0) html += `<div class="pasos-ped" style="flex-basis:100%">${FLUJO.map((e,i)=>`<span class="${i<=paso?'ok':''}" title="${e}"></span>`).join('')}<small>${esc(p.estado)} · paso ${paso+1} de 5</small></div>`;
     const sig = SIGUIENTE[p.estado];
+    const conMensajero = ['Confirmado','En preparación','En camino'].indexOf(p.estado) >= 0;
     if (sig) {
       html += `<a class="btn btn-wa principal" href="${esc(linkCliente(p, sig[0]))}" target="_blank" rel="noopener" data-avanzar="${esc(p.id)}" data-a="${esc(sig[0])}">${esc(sig[1])}</a>`;
     } else if (p.estado === 'En camino') {
-      html += `<span class="btn btn-wa principal subir-foto">📷 Entregado: subir foto de entrega<input type="file" accept="image/*" capture="environment" data-fotoped="${esc(p.id)}"></span>
-        <small class="espera" style="flex-basis:100%">O espera: cuando el mensajero suba la foto, te sonará un aviso aquí.</small>`;
+      html += `<a class="btn btn-wa principal" href="${esc(linkCliente(p,'En camino'))}" target="_blank" rel="noopener">📲 Avisar al cliente: va en camino</a>
+        <span class="btn btn-borde subir-foto" style="flex-basis:100%">📷 Entregado: subir foto de entrega<input type="file" accept="image/*" capture="environment" data-fotoped="${esc(p.id)}"></span>
+        <small class="espera" style="flex-basis:100%">O espera: cuando el mensajero suba la foto con su enlace, te sonará un aviso aquí.</small>`;
     } else if (p.estado === 'Entregado') {
       if (p.fotoEntrega)
         html += `<div class="foto-ent" style="flex-basis:100%"><img src="${esc(p.fotoEntrega)}" alt="Foto de entrega"><span>Entregado con foto${p.historial && p.historial.some(h=>h.por==='mensajero') ? ' por el mensajero' : ''}</span></div>
@@ -874,6 +890,12 @@ table.t tr:last-child td{border-bottom:0}
           <span class="btn btn-borde btn-sm subir-foto">📷 Agregar foto de entrega<input type="file" accept="image/*" capture="environment" data-fotoped="${esc(p.id)}"></span>`;
     } else if (p.estado === 'Cancelado') {
       html += `<a class="btn btn-borde btn-sm" href="${esc(linkCliente(p,'Cancelado'))}" target="_blank" rel="noopener">Avisar cancelación</a>`;
+    }
+    if (conMensajero) {
+      html += `<div class="mensajero" style="flex-basis:100%">
+        <button class="btn btn-borde" data-mensajero="${esc(p.id)}">🛵 ${p.tokenEntrega ? 'Reenviar link al mensajero' : 'Enviar link al mensajero'}</button>
+        ${p.tokenEntrega ? `<span class="link-on">🟢 Link activo · se desactiva al entregar</span><button class="btn btn-borde btn-sm" data-anular="${esc(p.id)}">Anular link</button>` : ''}
+      </div>`;
     }
     if (MSG[p.estado] && p.estado !== 'Entregado' && p.estado !== 'Cancelado')
       html += `<a class="btn btn-borde btn-sm" href="${esc(linkCliente(p,p.estado))}" target="_blank" rel="noopener" title="Volver a enviar el mensaje del estado actual">↻ Reenviar aviso</a>`;
@@ -893,7 +915,8 @@ table.t tr:last-child td{border-bottom:0}
         <div class="dato"><b>Cliente:</b> ${esc(p.cliente)} · <a href="https://wa.me/${DN.telWa(p.telefono)}" target="_blank" rel="noopener" style="color:var(--rosa)">${esc(p.telefono)}</a></div>
         ${p.recibe?`<div class="dato"><b>Recibe:</b> ${esc(p.recibe)}</div>`:''}
         ${p.fechaEntrega?`<div class="dato"><b>Entrega:</b> ${esc(p.fechaEntrega)}</div>`:''}
-        ${p.direccion?`<div class="dato"><b>Dirección:</b> ${esc(p.direccion)}</div>`:''}
+        ${p.direccion?`<div class="dato"><b>Dirección:</b> ${esc(p.direccion)}${p.zona ? ` <span class="pill oculto">${esc(p.zona)}</span>` : ''}</div>`:''}
+        ${p.zona === 'Otra zona' && !p.domicilio ? `<div class="dato" style="color:var(--warn)"><b style="color:var(--warn)">Domicilio:</b> zona no listada, escribe el valor abajo y confírmaselo al cliente</div>` : ''}
         <pre>${esc(p.productos)}</pre>
         ${p.mensaje?`<div class="dato"><b>Tarjeta:</b> <i>${esc(p.mensaje)}</i></div>`:''}
         ${p.notas?`<div class="dato"><b>Notas:</b> ${esc(p.notas)}</div>`:''}
@@ -948,6 +971,32 @@ table.t tr:last-child td{border-bottom:0}
   });
 
   function aBlob(dataUrl){ const [h,b] = dataUrl.split(','); const bin = atob(b); const u = new Uint8Array(bin.length); for (let i=0;i<bin.length;i++) u[i]=bin.charCodeAt(i); return new Blob([u], { type: h.match(/:(.*?);/)[1] }); }
+  // ---------- Mensajero: enlace de un solo uso ----------
+  function textoMensajero(p, link){
+    const cobrar = DN.esEfectivo(p.pago)
+      ? '💵 Cobrar en efectivo: ' + pesos(Number(p.total||0) + Number(p.domicilio||0)) + (p.domicilio ? '' : ' + domicilio') + (/paga con/i.test(p.pago) ? ' (' + p.pago.split('·')[1].trim() + ')' : '')
+      : '✅ Ya está pagado, no cobrar';
+    return `🛵 *Entrega ${DATA.config.nombre || 'Dulcenata'}* · ${p.id}\n📅 ${p.fechaEntrega || 'Hoy'}\n📍 ${p.direccion}\n🎀 Recibe: ${p.recibe}\n${cobrar}\n\n👉 Abre este enlace para ver el pedido y, al entregar, *tomar la foto*:\n${link}\n\n(El enlace es solo para esta entrega y se desactiva al terminar)`;
+  }
+  function enviarMensajero(id){
+    const p = DATA.pedidos.find(x=>x.id===id); if (!p) return;
+    const nuevo = !p.tokenEntrega;
+    const tk = p.tokenEntrega || DN.nuevoToken();
+    // Abrimos WhatsApp en el mismo toque (sin número: eliges el contacto del mensajero)
+    const a = document.createElement('a'); a.href = 'https://wa.me/?text=' + encodeURIComponent(textoMensajero(p, DN.linkEntrega(tk))); a.target = '_blank'; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); a.remove();
+    if (nuevo) {
+      p.tokenEntrega = tk; pintarPedidos();
+      DN.actualizarPedido(PIN, id, { tokenEntrega: tk }).then(()=>toast('Link creado. Elige el chat del mensajero en WhatsApp')).catch(()=>{ p.tokenEntrega = ''; pintarPedidos(); toast('No se guardó el link. Intenta de nuevo'); });
+    }
+  }
+  async function anularLink(id){
+    const p = DATA.pedidos.find(x=>x.id===id); if (!p) return;
+    const prev = p.tokenEntrega; p.tokenEntrega = ''; pintarPedidos();
+    try { await DN.actualizarPedido(PIN, id, { tokenEntrega: '' }); toast('Link anulado: ya no funciona'); }
+    catch(e){ p.tokenEntrega = prev; pintarPedidos(); toast('No se pudo anular'); }
+  }
+
   // Envía la foto como IMAGEN por WhatsApp (celular) o, si no se puede, el mensaje con el enlace a la foto
   async function enviarFoto(id){
     const p = DATA.pedidos.find(x=>x.id===id); if (!p) return;
@@ -983,15 +1032,20 @@ table.t tr:last-child td{border-bottom:0}
       || '<p class="ayuda">Escribe primero los medios de pago arriba.</p>';
   }
   $('#aPagos').addEventListener('input', pintarPagosInfo);
+  function filaZona(z){ return `<div class="zona"><input data-zn placeholder="Zona o barrio" value="${esc(z.nombre||'')}" aria-label="Zona"><input data-zv inputmode="numeric" placeholder="$ valor" value="${z.valor ? Number(z.valor).toLocaleString('es-CO') : ''}" aria-label="Valor del domicilio"><button type="button" data-qzona aria-label="Quitar zona">✕</button></div>`; }
+  function pintarZonasAj(){ const Z = DN.zonas(DATA.config); $('#zonasBox').innerHTML = Z.map(filaZona).join('') || '<p class="ayuda" style="margin:0">Sin zonas: el cliente no verá valor de domicilio al pedir.</p>'; }
+  $('#addZona').addEventListener('click', () => { const p = $('#zonasBox p'); if (p) p.remove(); $('#zonasBox').insertAdjacentHTML('beforeend', filaZona({})); $('#zonasBox .zona:last-child input').focus(); });
+  $('#zonasBox').addEventListener('click', e => { if (e.target.closest('[data-qzona]')) e.target.closest('.zona').remove(); });
+  $('#zonasBox').addEventListener('input', e => { if (e.target.dataset.zv !== undefined) { const n = Number(e.target.value.replace(/\D/g,'')); e.target.value = n ? n.toLocaleString('es-CO') : ''; } });
   function pintarAjustes(){
     const c = DATA.config;
+    pintarZonasAj();
     CAMPOS.forEach(k => { $(idCampo(k)).value = c[k] || ''; });
     document.querySelectorAll('[data-pinfo]').forEach(el => el.remove());
     pintarPagosInfo();
     $('#bannerPrev').src = c.banner || 'banner.jpg';
     const link = DN.base(), nom = c.nombre || 'Dulcenata';
     $('#linkTienda').value = link;
-    $('#linkMensajero').value = link + 'mensajero.html';
     $('#msgBienvenida').value = `¡Hola! 💝 Bienvenid@ a ${nom}.\n\nMira nuestro catálogo, elige tu regalo y haz tu pedido aquí 👇\n${link}\n\nTambién puedes escribirnos por aquí y con gusto te ayudamos. 🎁`;
     $('#msgBio').value = `🎁 ${c.eslogan || 'Los mejores desayunos y detalles de Medellín'}\n🥐 Desayunos sorpresa · Anchetas · Globos\n🚚 Entregas en ${c.ciudad||'Medellín'}\n👇 Haz tu pedido aquí`;
   }
@@ -1001,6 +1055,7 @@ table.t tr:last-child td{border-bottom:0}
     cfg.whatsapp = cfg.whatsapp.replace(/\D/g,''); cfg.instagram = cfg.instagram.replace('@','');
     const pinfo = {}; document.querySelectorAll('[data-pinfo]').forEach(el => pinfo[el.dataset.pinfo] = el.value.trim());
     cfg.pagosInfo = JSON.stringify(pinfo);
+    cfg.zonas = JSON.stringify([...document.querySelectorAll('#zonasBox .zona')].map(r => ({ nombre: r.querySelector('[data-zn]').value.trim(), valor: Number(r.querySelector('[data-zv]').value.replace(/\D/g,'')) || 0 })).filter(z => z.nombre));
     const btn = $('#btnAjustes'); ocupado(btn, true, 'Guardando…');
     try { await DN.guardarConfig(PIN, cfg); DATA.config = Object.assign({}, DATA.config, cfg); pintarAjustes(); toast('Ajustes guardados'); }
     catch(err){ toast('No se guardó: ' + err.message); }
@@ -1035,6 +1090,8 @@ table.t tr:last-child td{border-bottom:0}
     if (d.avanzar){ cambiarEstadoPedido(d.avanzar, d.a, false); return; } // el enlace abre WhatsApp con el aviso
     if (d.aviso) return;
     if (d.enviarfoto){ enviarFoto(d.enviarfoto); return; }
+    if (d.mensajero){ enviarMensajero(d.mensajero); return; }
+    if (d.anular){ anularLink(d.anular); return; }
     if (await accionCategoria(d)) return;
     if (await accionMensaje(d)) return;
     if (d.rango){ rango(d.rango); return; }

@@ -92,6 +92,11 @@
       if (typeof m === 'string') { try { m = JSON.parse(m); } catch (e) { m = {}; } }
       return m && typeof m === 'object' ? m : {};
     },
+    zonas(config) {
+      let z = config.zonas;
+      if (typeof z === 'string') { try { z = JSON.parse(z); } catch (e) { z = []; } }
+      return Array.isArray(z) ? z.filter(x => x && x.nombre).map(x => ({ nombre: String(x.nombre), valor: Number(x.valor) || 0 })) : [];
+    },
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 
     async tienda() {
@@ -180,7 +185,7 @@
       if (DEMO) {
         demoDb = demoLoad();
         const p = demoDb.pedidos.find(x => x.id === id);
-        if (p) { p.estado = estado; p.historial = hist(p.historial); p.historial.push({ e: estado, t: new Date().toISOString() }); }
+        if (p) { p.estado = estado; p.historial = hist(p.historial); p.historial.push({ e: estado, t: new Date().toISOString() }); if (estado === 'Entregado' || estado === 'Cancelado') p.tokenEntrega = ''; }
         demoSave(demoDb); return true;
       }
       return post({ action: 'estadoPedido', pin, id, estado });
@@ -189,33 +194,45 @@
       if (DEMO) {
         demoDb = demoLoad();
         const p = demoDb.pedidos.find(x => x.id === id);
-        if (p) { p.fotoEntrega = url; if (p.estado !== 'Entregado') { p.estado = 'Entregado'; p.historial = hist(p.historial); p.historial.push({ e: 'Entregado', t: new Date().toISOString() }); } }
+        if (p) { p.fotoEntrega = url; p.tokenEntrega = ''; if (p.estado !== 'Entregado') { p.estado = 'Entregado'; p.historial = hist(p.historial); p.historial.push({ e: 'Entregado', t: new Date().toISOString() }); } }
         demoSave(demoDb); return true;
       }
       return post({ action: 'fotoEntrega', pin, id, url });
     },
-    // ----- Mensajero -----
-    async mensajeroLogin(pin) {
-      if (DEMO) { if (['5678', '1234'].indexOf(String(pin)) < 0) throw new Error('PIN incorrecto'); return true; }
-      return post({ action: 'mensajeroLogin', pin });
-    },
-    async mensajeroPedidos(pin) {
-      if (DEMO) { demoDb = demoLoad(); return demoDb.pedidos.filter(p => ['Confirmado', 'En preparación', 'En camino'].indexOf(p.estado) >= 0); }
-      return post({ action: 'mensajeroPedidos', pin });
-    },
-    async mensajeroEnCamino(pin, id) {
-      if (DEMO) return DN.estadoPedido(pin, id, 'En camino');
-      return post({ action: 'mensajeroEnCamino', pin, id });
-    },
-    async mensajeroEntregar(pin, id, dataUrl, quien) {
+    // ----- Mensajero: enlace de un solo uso -----
+    async entrega(tk) {
       if (DEMO) {
         demoDb = demoLoad();
-        const p = demoDb.pedidos.find(x => x.id === id);
-        if (p) { p.fotoEntrega = dataUrl; p.estado = 'Entregado'; p.historial = hist(p.historial); p.historial.push({ e: 'Entregado', t: new Date().toISOString(), por: 'mensajero', quien: quien || '' }); }
+        const p = demoDb.pedidos.find(x => x.tokenEntrega && x.tokenEntrega === tk);
+        if (!p || ['Entregado', 'Cancelado'].indexOf(p.estado) >= 0) throw new Error('USADO');
+        return Object.assign({}, p, { config: mergeConfig(demoDb.config) });
+      }
+      const d = await get({ action: 'entrega', tk }); d.config = mergeConfig(d.config); return d;
+    },
+    async entregaEnCamino(tk) {
+      if (DEMO) {
+        const p = await DN.entrega(tk); demoDb = demoLoad();
+        const q = demoDb.pedidos.find(x => x.id === p.id);
+        if (q.estado !== 'En camino') { q.estado = 'En camino'; q.historial = hist(q.historial); q.historial.push({ e: 'En camino', t: new Date().toISOString(), por: 'mensajero' }); }
+        demoSave(demoDb); return true;
+      }
+      return post({ action: 'entregaEnCamino', tk });
+    },
+    async entregaFinalizar(tk, dataUrl, quien) {
+      if (DEMO) {
+        const p = await DN.entrega(tk); demoDb = demoLoad();
+        const q = demoDb.pedidos.find(x => x.id === p.id);
+        q.fotoEntrega = dataUrl; q.estado = 'Entregado'; q.tokenEntrega = '';
+        q.historial = hist(q.historial); q.historial.push({ e: 'Entregado', t: new Date().toISOString(), por: 'mensajero', quien: quien || '' });
         demoSave(demoDb); return { fotoEntrega: dataUrl };
       }
-      return post({ action: 'mensajeroEntregar', pin, id, dataUrl, quien });
+      return post({ action: 'entregaFinalizar', tk, dataUrl, quien });
     },
+    nuevoToken() {
+      const a = new Uint8Array(12); (window.crypto || window.msCrypto).getRandomValues(a);
+      return Array.from(a, b => 'abcdefghijkmnpqrstuvwxyz23456789'[b % 32]).join('');
+    },
+    linkEntrega(tk) { return DN.base() + 'entrega.html#' + tk; },
 
     async actualizarPedido(pin, id, campos) {
       if (DEMO) { demoDb = demoLoad(); const p = demoDb.pedidos.find(x => x.id === id); if (p) Object.assign(p, campos); demoSave(demoDb); return true; }

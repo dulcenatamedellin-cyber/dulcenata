@@ -25,6 +25,19 @@ window.DULCENATA_CONFIG = {
   nit: '',                  // NIT o cédula (opcional, sale en el recibo)
   categorias: '["Desayunos sorpresa","Anchetas","Detalles dulces","Globos","Flores","Peluches"]',
 
+  // Zonas de domicilio con su valor (se editan en el panel > Ajustes). Valores de ejemplo.
+  zonas: [
+    { nombre: 'El Poblado', valor: 8000 },
+    { nombre: 'Laureles / Estadio', valor: 8000 },
+    { nombre: 'Belén', valor: 8000 },
+    { nombre: 'Centro / La Candelaria', valor: 9000 },
+    { nombre: 'Robledo / Castilla', valor: 10000 },
+    { nombre: 'Envigado', valor: 10000 },
+    { nombre: 'Itagüí', valor: 10000 },
+    { nombre: 'Sabaneta', valor: 12000 },
+    { nombre: 'Bello', valor: 14000 }
+  ],
+
   // Datos que ve el cliente al elegir cada medio de pago (se editan en el panel > Ajustes)
   pagosInfo: {
     'Nequi': 'Al confirmar tu pedido te enviamos por WhatsApp los datos para pagar.',

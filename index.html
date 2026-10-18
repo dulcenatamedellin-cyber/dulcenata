@@ -353,6 +353,9 @@ label.campo small{font-weight:600;color:var(--muted)}
           <option>En la tarde (2 p. m. – 6 p. m.)</option>
           <option>En la noche (6 p. m. – 8 p. m.)</option>
         </select></label>
+      <label class="campo full" id="cajaZona">Zona o barrio de entrega *
+        <select id="fZona"></select>
+        <small id="zonaTxt"></small></label>
       <label class="campo full">Dirección de entrega *<input id="fDir" required autocomplete="street-address" placeholder="Dirección, barrio, ciudad, apto / casa"></label>
       <div class="bloque full" id="bloqueTarjeta">
         <b>💌 Mensaje para la tarjeta <small style="font-weight:600;color:var(--muted)">(opcional)</small></b>
@@ -566,6 +569,39 @@ label.campo small{font-weight:600;color:var(--muted)}
       .map(m => `<button type="button" class="frase ${m.texto===actual?'on':''}" data-frase="${esc(m.texto)}">${esc(m.texto)}</button>`).join('');
   }
 
+  // ---------- Domicilio por zona ----------
+  const OTRA = '__otra';
+  function pintarZonas(){
+    const Z = DN.zonas(CFG);
+    $('#cajaZona').hidden = !Z.length; $('#fZona').required = !!Z.length;
+    if (!Z.length) return;
+    const v = $('#fZona').value;
+    $('#fZona').innerHTML = '<option value="" disabled selected>Elige tu zona…</option>' +
+      Z.map((z,i) => `<option value="${i}">${esc(z.nombre)} · ${z.valor ? pesos(z.valor) : 'gratis'}</option>`).join('') +
+      `<option value="${OTRA}">Otra zona · te confirmamos el valor</option>`;
+    if (v) $('#fZona').value = v;
+  }
+  function zonaElegida(){
+    const v = $('#fZona').value, Z = DN.zonas(CFG);
+    if (!v || $('#cajaZona').hidden) return null;
+    if (v === OTRA) return { nombre: 'Otra zona', valor: null };
+    return Z[Number(v)] || null;
+  }
+  const domicilioActual = () => { const z = zonaElegida(); return z && z.valor != null ? z.valor : 0; };
+  function pintarResumen(){
+    const lineas = carrito.map(i => `<div><span>${i.cantidad} × ${esc(i.nombre)}</span><b>${pesos(i.precio*i.cantidad)}</b></div>`).join('');
+    const z = zonaElegida(), dom = domicilioActual(), sub = totalCarrito();
+    const filaDom = !z ? `<div><span>Domicilio</span><b style="color:var(--muted)">Elige tu zona</b></div>`
+      : z.valor == null ? `<div><span>Domicilio (otra zona)</span><b style="color:var(--muted)">Por confirmar</b></div>`
+      : `<div><span>Domicilio · ${esc(z.nombre)}</span><b>${z.valor ? pesos(z.valor) : 'Gratis'}</b></div>`;
+    $('#resumen').innerHTML = lineas + `<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Subtotal productos</span><b>${pesos(sub)}</b></div>` + filaDom +
+      `<div style="font-size:1.1rem;margin-top:4px"><span><b>Total a pagar</b></span><b style="color:var(--rosa)">${pesos(sub + dom)}${z && z.valor == null ? ' + domicilio' : ''}</b></div>` +
+      (DN.zonas(CFG).length ? '' : `<div class="nota">${esc(CFG.domicilio||'')}</div>`);
+    $('#zonaTxt').textContent = z && z.valor == null ? 'Te escribimos por WhatsApp con el valor del domicilio para tu zona.' : '';
+    calcVueltas();
+  }
+  $('#fZona').addEventListener('change', pintarResumen);
+
   // ---------- Pago: datos de la cuenta y efectivo ----------
   function medioPago(){ return (document.querySelector('input[name=pago]:checked')||{}).value || ''; }
   const soloNum = v => Number(String(v||'').replace(/\D/g,'')) || 0;
@@ -580,10 +616,11 @@ label.campo small{font-weight:600;color:var(--muted)}
     calcVueltas();
   }
   function calcVueltas(){
-    const paga = soloNum($('#fPagaCon').value), tot = totalCarrito();
+    const paga = soloNum($('#fPagaCon').value), tot = totalCarrito() + domicilioActual();
     if (!paga) { $('#vueltas').textContent = ''; return; }
-    $('#vueltas').textContent = paga < tot ? 'Ese valor es menor que el total de los productos (' + pesos(tot) + ').'
-      : 'Vueltas aproximadas: ' + pesos(paga - tot) + ' (antes del domicilio)';
+    const conDom = zonaElegida() && zonaElegida().valor != null;
+    $('#vueltas').textContent = paga < tot ? 'Ese valor es menor que el total a pagar (' + pesos(tot) + ').'
+      : 'Vueltas: ' + pesos(paga - tot) + (conDom ? '' : ' (antes del domicilio)');
   }
   $('#fPagos').addEventListener('change', pintarPago);
 
@@ -612,8 +649,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   // ---------- Pedido ----------
   function abrirDatos(){
     if (!carrito.length) return;
-    const lineas = carrito.map(i => `<div><span>${i.cantidad} × ${esc(i.nombre)}</span><b>${pesos(i.precio*i.cantidad)}</b></div>`).join('');
-    $('#resumen').innerHTML = lineas + `<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Total productos</span><b>${pesos(totalCarrito())}</b></div><div class="nota">${esc(CFG.domicilio||'')}</div>`;
+    pintarZonas(); pintarResumen();
     const hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
     $('#fFecha').min = hoy.toISOString().slice(0,10);   // desde hoy; la hora se cuadra por WhatsApp
     pintarFrases(); pintarPago();
@@ -633,11 +669,15 @@ label.campo small{font-weight:600;color:var(--muted)}
     const id = DN.nuevoId();
     const medio = medioPago();
     const pagaCon = DN.esEfectivo(medio) ? soloNum($('#fPagaCon').value) : 0;
-    if (DN.esEfectivo(medio) && pagaCon && pagaCon < totalCarrito()) { toast('Revisa con cuánto vas a pagar'); $('#fPagaCon').focus(); return; }
+    const zona = zonaElegida();
+    if (!$('#cajaZona').hidden && !zona) { toast('Elige la zona de entrega'); $('#fZona').focus(); return; }
+    const dom = zona && zona.valor != null ? zona.valor : '';
+    if (DN.esEfectivo(medio) && pagaCon && pagaCon < totalCarrito() + (Number(dom)||0)) { toast('Revisa con cuánto vas a pagar'); $('#fPagaCon').focus(); return; }
     const pago = medio + (pagaCon ? ' · paga con ' + pesos(pagaCon) : '');
     const tarjeta = $('#fTarjeta').value.trim(), firma = $('#fFirma').value.trim();
     const pedido = {
       comprobanteData: compData || undefined,
+      zona: zona ? zona.nombre : '', domicilio: dom,
       id, cliente: $('#fNombre').value.trim(), telefono: $('#fTel').value.trim(), recibe: $('#fRecibe').value.trim(),
       direccion: $('#fDir').value.trim(), fechaEntrega: fechaBonita($('#fFecha').value, $('#fFranja').value), notas: $('#fNotas').value.trim(), pago,
       mensaje: [carrito.filter(i=>i.mensaje).map(i => i.nombre + ': ' + i.mensaje).join(' | '), tarjeta].filter(Boolean).join(' | ') + (firma ? ' — De: ' + firma : ''),
@@ -646,12 +686,13 @@ label.campo small{font-weight:600;color:var(--muted)}
     };
     let txt = `🎁 *Nuevo pedido ${CFG.nombre||'Dulcenata'}* · ${id}\n\n*Productos:*\n`;
     carrito.forEach(i => { txt += `• ${i.cantidad} × ${i.nombre} — ${pesos(i.precio*i.cantidad)}\n`; if (i.mensaje) txt += `   💌 Tarjeta: "${i.mensaje}"\n`; });
-    txt += `\n*Total productos:* ${pesos(pedido.total)} _(+ domicilio)_\n\n`;
-    txt += `👤 *Cliente:* ${pedido.cliente} · ${pedido.telefono}\n🎀 *Recibe:* ${pedido.recibe}\n📅 *Entrega:* ${pedido.fechaEntrega}\n📍 *Dirección:* ${pedido.direccion}\n💳 *Pago:* ${pago}`;
+    if (zona && zona.valor != null) txt += `\n*Subtotal:* ${pesos(pedido.total)}\n🛵 *Domicilio (${zona.nombre}):* ${zona.valor ? pesos(zona.valor) : 'Gratis'}\n💰 *Total a pagar:* ${pesos(pedido.total + zona.valor)}\n\n`;
+    else txt += `\n*Total productos:* ${pesos(pedido.total)} _(+ domicilio${zona ? ', ' + zona.nombre + ': por confirmar' : ''})_\n\n`;
+    txt += `👤 *Cliente:* ${pedido.cliente} · ${pedido.telefono}\n🎀 *Recibe:* ${pedido.recibe}\n📅 *Entrega:* ${pedido.fechaEntrega}\n📍 *Dirección:* ${pedido.direccion}${zona ? ' (' + zona.nombre + ')' : ''}\n💳 *Pago:* ${pago}`;
     if (tarjeta || firma) txt += `\n💌 *Tarjeta:* ${tarjeta ? '"' + tarjeta + '"' : '(sin mensaje)'}${firma ? '\n   ✍️ De parte de: ' + firma : ''}`;
     if (compData) txt += `\n📎 *Comprobante:* adjunto en el pedido (subido desde la tienda)`;
     else if (!DN.esEfectivo(medio)) txt += `\n📎 *Comprobante:* te lo envío por aquí`;
-    if (pagaCon) txt += `\n💵 *Vueltas:* paga con ${pesos(pagaCon)} (productos ${pesos(pedido.total)} + domicilio)`;
+    if (pagaCon) txt += `\n💵 *Vueltas:* paga con ${pesos(pagaCon)}` + (dom !== '' ? ` → llevar ${pesos(pagaCon - pedido.total - Number(dom))}` : ` (productos ${pesos(pedido.total)} + domicilio)`);
     if (pedido.notas) txt += `\n📝 *Notas:* ${pedido.notas}`;
     txt += `\n\n🔎 Sigue tu pedido con tu celular: ${DN.linkSeguimiento(pedido.telefono)}`;
     const url = waLink(txt);
