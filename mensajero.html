@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Entregas Dulcenata</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="light only">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#9c1150">
+<link rel="icon" href="logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: app del mensajero — lista de entregas en tarjetas grandes, botones de pulgar abajo de cada tarjeta. */
+:root{
+  --rosa:#d81b70; --rosa-hondo:#9c1150; --rosa-suave:#fde3ee; --sol:#ffd60a;
+  --bg:#faf5f7; --card:#ffffff; --fg:#2b1420; --muted:#7c5b6b; --line:#eedbe4;
+  --ok:#15803d; --ok-bg:#dcfce7; --warn:#92400e; --warn-bg:#fef3c7; --info:#1d4ed8; --info-bg:#dbeafe; --wa:#25d366;
+  --f-display:'Fraunces', Georgia, serif; --f-body:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html{color-scheme:light only}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:60;background:var(--card)}
+img{max-width:100%;display:block}
+button,input{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.15}
+.wrap{max-width:640px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;border-radius:14px;padding:13px 16px;font-weight:800;border:2px solid transparent;text-decoration:none;cursor:pointer;text-align:center}
+.btn-rosa{background:var(--rosa);color:#fff}
+.btn-borde{border-color:var(--line);background:var(--card);color:var(--fg)}
+.btn-ok{background:var(--ok);color:#fff}
+.btn:disabled{opacity:.6}
+.login{min-height:100vh;display:grid;place-items:center;padding-block:24px}
+.login form{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:28px 24px;width:min(360px,100%);text-align:center;display:flex;flex-direction:column;gap:12px}
+.login img{width:84px;height:84px;border-radius:50%;margin:0 auto;box-shadow:0 0 0 4px var(--sol)}
+.login input{text-align:center;font-size:1.6rem;letter-spacing:.5em;padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--bg)}
+.error{color:#b91c1c;font-weight:700;min-height:1.2em;margin:0}
+.barra{position:sticky;top:env(safe-area-inset-top,0px);z-index:40;background:var(--card);border-bottom:1px solid var(--line)}
+.barra .wrap{display:flex;align-items:center;gap:10px;padding-block:10px}
+.barra img{width:40px;height:40px;border-radius:50%;box-shadow:0 0 0 3px var(--sol)}
+.barra h1{font-size:1.15rem;flex:1}
+.barra h1 i{color:var(--rosa)}
+.chip{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.85rem;cursor:pointer}
+.chip.on{border-color:var(--rosa);color:var(--rosa)}
+main{padding-block:16px 60px;display:flex;flex-direction:column;gap:14px}
+.resumen{display:flex;gap:10px}
+.resumen div{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.resumen span{display:block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.resumen b{font-family:var(--f-display);font-size:1.5rem}
+.vivo{font-size:.78rem;color:var(--muted);text-align:center}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:16px;display:flex;flex-direction:column;gap:10px;border-left:6px solid var(--info)}
+.card[data-e="En camino"]{border-left-color:var(--rosa)}
+.card .top{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.card .top b{font-family:var(--f-display);font-size:1.2rem}
+.pill{font-size:.75rem;font-weight:800;padding:3px 10px;border-radius:999px;background:var(--info-bg);color:var(--info);white-space:nowrap}
+.card[data-e="En camino"] .pill{background:var(--rosa-suave);color:var(--rosa-hondo)}
+.entrega{font-weight:800;color:var(--rosa-hondo)}
+.dir{font-size:1.05rem;font-weight:700}
+.dato{font-size:.92rem}
+.dato b{color:var(--muted)}
+pre{margin:0;font-family:inherit;white-space:pre-wrap;background:var(--bg);border-radius:10px;padding:8px 10px;font-size:.92rem}
+.cobro{border-radius:12px;padding:10px 12px;font-weight:700;font-size:.95rem}
+.cobro.efectivo{background:var(--warn-bg);color:var(--warn)}
+.cobro.pagado{background:var(--ok-bg);color:var(--ok)}
+.fila{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.subir{position:relative;overflow:hidden}
+.subir input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.quien{width:100%;padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--bg)}
+.vacio{text-align:center;color:var(--muted);padding:40px 16px;background:var(--card);border-radius:20px;border:1px dashed var(--line)}
+.toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--fg);color:var(--bg);padding:12px 18px;border-radius:14px;font-weight:700;font-size:.92rem;z-index:100;opacity:0;transition:all .25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+.demo{background:var(--sol);color:#2b1420;text-align:center;font-size:.85rem;font-weight:700;padding:6px 12px}
+</style>
+</head>
+<body>
+
+<section class="login wrap" id="vLogin">
+  <form id="fLogin">
+    <img src="logo.jpg" alt="Dulcenata">
+    <h2>Entregas</h2>
+    <p style="margin:0;color:var(--muted)">Escribe la clave de mensajero.</p>
+    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" required aria-label="Clave">
+    <p class="error" id="err"></p>
+    <button class="btn btn-rosa" id="btnLogin">Entrar</button>
+    <p id="pista" hidden style="font-size:.85rem;color:var(--muted);background:var(--warn-bg);border-radius:10px;padding:6px;margin:0">Demostración · clave: <b>5678</b></p>
+  </form>
+</section>
+
+<div id="vApp" hidden>
+  <div class="demo" id="avisoDemo" hidden>Modo demostración</div>
+  <header class="barra"><div class="wrap">
+    <img src="logo.jpg" alt="">
+    <h1>Entregas <i>Dulcenata</i></h1>
+    <button class="chip" id="btnSonido" type="button">🔕</button>
+    <button class="chip" id="salir" type="button">Salir</button>
+  </div></header>
+  <main class="wrap">
+    <div class="resumen">
+      <div><span>Por salir</span><b id="nSalir">0</b></div>
+      <div><span>En camino</span><b id="nCamino">0</b></div>
+    </div>
+    <p class="vivo" id="vivo">Se actualiza solo</p>
+    <div id="lista" style="display:flex;flex-direction:column;gap:14px"></div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s), esc = DN.esc, pesos = DN.pesos;
+  let PIN = '', LISTA = [], CFG = window.DULCENATA_CONFIG || {}, sonido = false;
+  function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('on'),2800); }
+  if (DN.DEMO) $('#pista').hidden = false;
+  try { PIN = sessionStorage.getItem('dn_pin_m') || ''; sonido = localStorage.getItem('dn_sonido_m') === '1'; } catch(e){}
+  if (PIN) entrar(PIN, true);
+
+  $('#fLogin').addEventListener('submit', e => { e.preventDefault(); entrar($('#pin').value.trim()); });
+  async function entrar(pin, silencioso){
+    $('#btnLogin').disabled = true; $('#err').textContent = '';
+    try {
+      await DN.mensajeroLogin(pin);
+      PIN = pin; try { sessionStorage.setItem('dn_pin_m', pin); } catch(e){}
+      $('#vLogin').hidden = true; $('#vApp').hidden = false; $('#avisoDemo').hidden = !DN.DEMO;
+      pintarSonido(); await cargar(true);
+    } catch(err){
+      if (!silencioso) $('#err').textContent = err.message === 'PIN incorrecto' ? 'Clave incorrecta.' : 'Sin conexión. Intenta de nuevo.';
+      try { sessionStorage.removeItem('dn_pin_m'); } catch(e){}
+    } finally { $('#btnLogin').disabled = false; }
+  }
+  $('#salir').addEventListener('click', () => { try { sessionStorage.removeItem('dn_pin_m'); } catch(e){} location.reload(); });
+
+  function pintarSonido(){ $('#btnSonido').textContent = sonido ? '🔔' : '🔕'; $('#btnSonido').classList.toggle('on', sonido); }
+  $('#btnSonido').addEventListener('click', () => { sonido = !sonido; try { localStorage.setItem('dn_sonido_m', sonido?'1':'0'); } catch(e){} if (sonido){ DN.desbloquearSonido(); setTimeout(()=>DN.sonar('estado'),60); } pintarSonido(); });
+  document.addEventListener('pointerdown', () => { if (sonido) DN.desbloquearSonido(); }, { once: true });
+
+  async function cargar(primera){
+    const antes = new Set(LISTA.map(p=>p.id));
+    const firma = L => JSON.stringify(L.map(p => [p.id, p.estado, p.domicilio, p.fechaEntrega]));
+    const viejo = firma(LISTA);
+    LISTA = await DN.mensajeroPedidos(PIN);
+    if (!primera && firma(LISTA) === viejo) { $('#vivo').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'}); return; }
+    const nuevos = LISTA.filter(p => !antes.has(p.id));
+    if (!primera && nuevos.length){ if (sonido) DN.sonar('estado'); toast('🎁 Nueva entrega: ' + nuevos.map(p=>p.id).join(', ')); }
+    pintar();
+    $('#vivo').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'});
+  }
+
+  function cobro(p){
+    const sub = Number(p.total||0), dom = Number(p.domicilio||0), tot = sub + dom;
+    if (DN.esEfectivo(p.pago)) {
+      const m = String(p.pago).match(/paga con \$?([\d.]+)/i), paga = m ? Number(m[1].replace(/\D/g,'')) : 0;
+      return `<div class="cobro efectivo">💵 Cobrar en efectivo: <b>${pesos(tot)}</b>${dom ? '' : ' + domicilio'}${paga ? `<br>Paga con ${pesos(paga)} → llevar vueltas: <b>${pesos(Math.max(0, paga - tot))}</b>` : ''}</div>`;
+    }
+    return `<div class="cobro pagado">✅ Ya pagó por ${esc(String(p.pago||'transferencia').split('·')[0].trim())}. No cobrar.</div>`;
+  }
+
+  function pintar(){
+    $('#nSalir').textContent = LISTA.filter(p=>p.estado!=='En camino').length;
+    $('#nCamino').textContent = LISTA.filter(p=>p.estado==='En camino').length;
+    if (!LISTA.length){ $('#lista').innerHTML = '<div class="vacio">🎉 No hay entregas pendientes.<br>Esta página te avisa cuando llegue una nueva.</div>'; return; }
+    const orden = { 'En camino':0, 'En preparación':1, 'Confirmado':2 };
+    const L = LISTA.slice().sort((a,b) => (orden[a.estado]??3) - (orden[b.estado]??3));
+    const ciudad = CFG.ciudad || 'Medellín';
+    $('#lista').innerHTML = L.map(p => {
+      const mapa = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent((p.direccion||'') + ', ' + ciudad);
+      const tel = DN.telWa(p.telefono);
+      return `<article class="card" data-e="${esc(p.estado)}">
+        <div class="top"><b>${esc(p.id)}</b><span class="pill">${esc(p.estado)}</span></div>
+        ${p.fechaEntrega ? `<div class="entrega">📅 ${esc(p.fechaEntrega)}</div>` : ''}
+        <div class="dir">📍 ${esc(p.direccion||'')}</div>
+        <div class="dato"><b>Recibe:</b> ${esc(p.recibe||'')}</div>
+        <pre>${esc(p.productos||'')}</pre>
+        ${p.mensaje ? `<div class="dato"><b>Tarjeta:</b> <i>${esc(p.mensaje)}</i></div>` : ''}
+        ${p.notas ? `<div class="dato"><b>Notas:</b> ${esc(p.notas)}</div>` : ''}
+        ${cobro(p)}
+        <div class="fila">
+          <a class="btn btn-borde" href="${mapa}" target="_blank" rel="noopener">🗺️ Mapa</a>
+          <a class="btn btn-borde" href="https://wa.me/${tel}" target="_blank" rel="noopener">💬 Cliente</a>
+        </div>
+        ${p.estado !== 'En camino' ? `<button class="btn btn-rosa" data-salir="${esc(p.id)}">🚗 Salí a entregar</button>` : ''}
+        <input class="quien" data-quien="${esc(p.id)}" placeholder="¿Quién recibió? (opcional)" aria-label="Quién recibió">
+        <span class="btn btn-ok subir">📷 Entregado: tomar foto<input type="file" accept="image/*" capture="environment" data-foto="${esc(p.id)}"></span>
+      </article>`;
+    }).join('');
+  }
+
+  function reducir(file, max, q){
+    return new Promise((ok, mal) => { const r = new FileReader(); r.onerror = mal; r.onload = () => { const img = new Image(); img.onerror = mal; img.onload = () => {
+      const s = Math.min(1, max/Math.max(img.width, img.height)); const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*s); cv.height = Math.round(img.height*s);
+      const cx = cv.getContext('2d'); cx.fillStyle='#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height);
+      ok(cv.toDataURL('image/jpeg', q)); }; img.src = r.result; }; r.readAsDataURL(file); });
+  }
+
+  document.addEventListener('click', async e => {
+    const b = e.target.closest('[data-salir]'); if (!b) return;
+    b.disabled = true; b.textContent = 'Guardando…';
+    try { await DN.mensajeroEnCamino(PIN, b.dataset.salir); toast('Listo: en camino 🚗'); await cargar(); }
+    catch(err){ b.disabled = false; b.textContent = '🚗 Salí a entregar'; toast('No se guardó. Revisa la conexión.'); }
+  });
+  document.addEventListener('change', async e => {
+    const inp = e.target; if (!inp.dataset.foto) return;
+    const id = inp.dataset.foto, f = inp.files[0]; if (!f) return;
+    const span = inp.closest('.subir'); span.firstChild.textContent = 'Subiendo foto… ';
+    try {
+      const data = await reducir(f, DN.DEMO ? 800 : 1400, DN.DEMO ? .7 : .85);
+      const quien = (document.querySelector(`[data-quien="${CSS.escape(id)}"]`)||{}).value || '';
+      await DN.mensajeroEntregar(PIN, id, data, quien.trim());
+      toast('✅ ' + id + ' entregado. ¡Gracias!');
+      await cargar();
+    } catch(err){ span.firstChild.textContent = '📷 Entregado: tomar foto'; toast('No se pudo subir la foto. Intenta de nuevo.'); }
+  });
+
+  setInterval(() => { if (PIN && !document.hidden && !$('#vApp').hidden) cargar().catch(()=>{ $('#vivo').textContent = 'Sin conexión, reintentando…'; }); }, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && PIN && !$('#vApp').hidden) cargar().catch(()=>{}); });
+})();
+</script>
+</body>
+</html>

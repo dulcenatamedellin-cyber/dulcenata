@@ -153,6 +153,13 @@ label.c small{color:var(--muted);font-weight:600}
 /* Avisos y foto de entrega */
 .avisar{display:flex;gap:8px;flex-wrap:wrap;border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
 .btn-wa{background:#25d366;color:#073b1d}
+.btn-wa.principal{flex-basis:100%;padding:12px 16px;font-size:1rem;border-radius:14px}
+.pasos-ped{display:flex;gap:4px;align-items:center}
+.pasos-ped span{flex:1;height:6px;border-radius:99px;background:var(--line)}
+.pasos-ped span.ok{background:var(--rosa)}
+.pasos-ped small{flex:none;margin-left:8px;color:var(--muted);font-weight:700;font-size:.75rem}
+.espera{color:var(--muted);font-size:.8rem}
+.ped select{font-size:.8rem}
 .btn-wa.pulso{animation:pulso 1.2s ease-in-out 3}
 @keyframes pulso{50%{box-shadow:0 0 0 6px rgba(37,211,102,.35)}}
 .subir-foto{position:relative;overflow:hidden}
@@ -383,6 +390,10 @@ table.t tr:last-child td{border-bottom:0}
         <h3>Enlace de tu tienda</h3>
         <p class="ayuda">Este es el enlace que pones en WhatsApp Business, en la biografía de Instagram y en tus estados.</p>
         <div class="copiar"><input class="c" id="linkTienda" readonly style="padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--bg)"><button class="btn btn-rosa" data-copiar="linkTienda">Copiar</button></div>
+
+        <h3 class="seccion">Enlace para el mensajero</h3>
+        <p class="ayuda">Envíaselo al mensajero. Entra con su propia clave (está en Code.gs como MENSAJERO_PIN), ve los pedidos por entregar y sube la foto al entregar.</p>
+        <div class="copiar"><input class="c" id="linkMensajero" readonly style="padding:11px 13px;border-radius:12px;border:2px solid var(--line);background:var(--bg)"><button class="btn btn-rosa" data-copiar="linkMensajero">Copiar</button></div>
 
         <h3 class="seccion">Mensaje de bienvenida para WhatsApp Business</h3>
         <p class="ayuda">WhatsApp Business › Herramientas para la empresa › Mensaje de bienvenida. Pega este texto:</p>
@@ -746,11 +757,16 @@ table.t tr:last-child td{border-bottom:0}
       const d = await DN.adminDatos(PIN);
       const antes = new Set(DATA.pedidos.map(p=>p.id));
       const nuevos = d.pedidos.filter(p => !antes.has(p.id));
+      const entregados = d.pedidos.filter(p => { const a = DATA.pedidos.find(x=>x.id===p.id); return a && a.estado !== 'Entregado' && p.estado === 'Entregado'; });
       if (firmaPed(d.pedidos) !== firmaPed(DATA.pedidos)) {
         DATA.pedidos = d.pedidos;
-        nuevosIds = new Set(nuevos.map(p=>p.id));
+        nuevosIds = new Set(nuevos.map(p=>p.id).concat(entregados.map(p=>p.id)));
         if (!editando) pintarPedidos();
         pintarCifras(); if (!$('#tVentas').hidden) pintarVentas(); titulo();
+      }
+      if (entregados.length) {
+        if (sonidoOn) DN.sonar('estado');
+        toast('📸 ' + entregados.map(p=>p.id).join(', ') + ' entregado' + (entregados.length>1?'s':'') + '. Envíale la foto y el recibo al cliente');
       }
       if (nuevos.length) {
         if (sonidoOn) DN.sonar('pedido');
@@ -826,28 +842,43 @@ table.t tr:last-child td{border-bottom:0}
     const tpl = DATA.config[MSG[estado] || 'msgConfirmado'] || '';
     const nombre = String(p.cliente||'').replace(/\(.*?\)/g,'').trim().split(' ')[0];
     let t = tpl;
-    if (estado === 'Confirmado' && t.indexOf('{recibo}') < 0) t += '\n\n🧾 Tu recibo de compra: {recibo}';
+    if ((estado === 'Confirmado' || estado === 'Entregado') && t.indexOf('{recibo}') < 0) t += '\n\n🧾 Tu recibo' + (estado === 'Entregado' ? ' con la foto de la entrega' : ' de compra') + ': {recibo}';
     return t.replace(/\{recibo\}/g, DN.linkRecibo(p)).replace(/\{cliente\}/g, nombre).replace(/\{pedido\}/g, p.id).replace(/\{entrega\}/g, p.fechaEntrega || 'por confirmar')
       .replace(/\{recibe\}/g, p.recibe || 'tu ser querido').replace(/\{link\}/g, DN.linkSeguimiento(p.telefono)).replace(/\{tienda\}/g, DATA.config.nombre || 'Dulcenata');
   }
   const linkCliente = (p, estado) => 'https://wa.me/' + DN.telWa(p.telefono) + '?text=' + encodeURIComponent(textoCliente(p, estado));
 
+  // Flujo: cada pedido tiene UN botón principal que pasa al siguiente estado y abre WhatsApp con el aviso
+  const FLUJO = ['Pendiente','Confirmado','En preparación','En camino','Entregado'];
+  const SIGUIENTE = {
+    'Pendiente':      ['Confirmado',     '✓ Confirmar y avisar al cliente'],
+    'Confirmado':     ['En preparación', '🎀 Pasar a "En preparación" y avisar'],
+    'En preparación': ['En camino',      '🚗 Pasar a "En camino" y avisar']
+  };
   function bloqueAviso(p){
-    const tel = DN.telWa(p.telefono);
     let html = '';
-    if (p.estado === 'Pendiente')
-      html += `<a class="btn btn-wa btn-sm" href="${esc(linkCliente(p,'Confirmado'))}" target="_blank" rel="noopener" data-confirmar="${esc(p.id)}">✓ Confirmar y avisar al cliente</a>`;
-    else if (MSG[p.estado] && p.estado !== 'Entregado')
-      html += `<a class="btn btn-wa btn-sm" data-aviso="${esc(p.id)}" href="${esc(linkCliente(p,p.estado))}" target="_blank" rel="noopener">Avisar: ${esc(p.estado.toLowerCase())}</a>`;
-    if (p.estado !== 'Cancelado'){
+    const paso = FLUJO.indexOf(p.estado);
+    if (paso >= 0) html += `<div class="pasos-ped" style="flex-basis:100%">${FLUJO.map((e,i)=>`<span class="${i<=paso?'ok':''}" title="${e}"></span>`).join('')}<small>${esc(p.estado)} · paso ${paso+1} de 5</small></div>`;
+    const sig = SIGUIENTE[p.estado];
+    if (sig) {
+      html += `<a class="btn btn-wa principal" href="${esc(linkCliente(p, sig[0]))}" target="_blank" rel="noopener" data-avanzar="${esc(p.id)}" data-a="${esc(sig[0])}">${esc(sig[1])}</a>`;
+    } else if (p.estado === 'En camino') {
+      html += `<span class="btn btn-wa principal subir-foto">📷 Entregado: subir foto de entrega<input type="file" accept="image/*" capture="environment" data-fotoped="${esc(p.id)}"></span>
+        <small class="espera" style="flex-basis:100%">O espera: cuando el mensajero suba la foto, te sonará un aviso aquí.</small>`;
+    } else if (p.estado === 'Entregado') {
       if (p.fotoEntrega)
-        html += `<div class="foto-ent" style="flex-basis:100%"><img src="${esc(p.fotoEntrega)}" alt="Foto de entrega"><span>Entregado con foto</span>
-          <button class="btn btn-wa btn-sm" data-enviarfoto="${esc(p.id)}">Enviar foto al cliente</button></div>`;
+        html += `<div class="foto-ent" style="flex-basis:100%"><img src="${esc(p.fotoEntrega)}" alt="Foto de entrega"><span>Entregado con foto${p.historial && p.historial.some(h=>h.por==='mensajero') ? ' por el mensajero' : ''}</span></div>
+          <button class="btn btn-wa principal" data-enviarfoto="${esc(p.id)}">📲 Enviar foto y recibo al cliente</button>`;
       else
-        html += `<span class="btn btn-borde btn-sm subir-foto">📷 Foto de entrega<input type="file" accept="image/*" data-fotoped="${esc(p.id)}"></span>`;
+        html += `<a class="btn btn-wa principal" href="${esc(linkCliente(p,'Entregado'))}" target="_blank" rel="noopener">✅ Avisar que fue entregado</a>
+          <span class="btn btn-borde btn-sm subir-foto">📷 Agregar foto de entrega<input type="file" accept="image/*" capture="environment" data-fotoped="${esc(p.id)}"></span>`;
+    } else if (p.estado === 'Cancelado') {
+      html += `<a class="btn btn-borde btn-sm" href="${esc(linkCliente(p,'Cancelado'))}" target="_blank" rel="noopener">Avisar cancelación</a>`;
     }
-    html += `<a class="btn btn-borde btn-sm" href="${esc(DN.linkSeguimiento(p.telefono))}" target="_blank" rel="noopener">Ver seguimiento</a>`;
+    if (MSG[p.estado] && p.estado !== 'Entregado' && p.estado !== 'Cancelado')
+      html += `<a class="btn btn-borde btn-sm" href="${esc(linkCliente(p,p.estado))}" target="_blank" rel="noopener" title="Volver a enviar el mensaje del estado actual">↻ Reenviar aviso</a>`;
     if (p.estado !== 'Cancelado') html += `<a class="btn btn-borde btn-sm" href="${esc(DN.linkRecibo(p))}" target="_blank" rel="noopener">🧾 Recibo</a>`;
+    html += `<a class="btn btn-borde btn-sm" href="${esc(DN.linkSeguimiento(p.telefono))}" target="_blank" rel="noopener">Seguimiento</a>`;
     return `<div class="avisar">${html}</div>`;
   }
 
@@ -871,7 +902,7 @@ table.t tr:last-child td{border-bottom:0}
         <label class="domi"><b style="color:var(--muted)">Domicilio $</b><input type="text" inputmode="numeric" data-domi="${esc(p.id)}" value="${p.domicilio ? Number(p.domicilio).toLocaleString('es-CO') : ''}" placeholder="0">
           <span>Total con domicilio: <b>${pesos(Number(p.total||0) + Number(p.domicilio||0))}</b></span></label>
         <div class="pie"><span class="tot">${pesos(p.total)} <small style="font-weight:600">· ${esc(p.pago||'')}</small></span>
-          <select data-ped="${esc(p.id)}" aria-label="Estado del pedido">${ESTADOS.map(s=>`<option ${s===p.estado?'selected':''}>${s}</option>`).join('')}</select></div>
+          <select data-ped="${esc(p.id)}" aria-label="Corregir estado del pedido" title="Corregir estado manualmente">${ESTADOS.map(s=>`<option ${s===p.estado?'selected':''}>${s}</option>`).join('')}</select></div>
         ${bloqueAviso(p)}
       </article>`;
     }).join('');
@@ -960,6 +991,7 @@ table.t tr:last-child td{border-bottom:0}
     $('#bannerPrev').src = c.banner || 'banner.jpg';
     const link = DN.base(), nom = c.nombre || 'Dulcenata';
     $('#linkTienda').value = link;
+    $('#linkMensajero').value = link + 'mensajero.html';
     $('#msgBienvenida').value = `¡Hola! 💝 Bienvenid@ a ${nom}.\n\nMira nuestro catálogo, elige tu regalo y haz tu pedido aquí 👇\n${link}\n\nTambién puedes escribirnos por aquí y con gusto te ayudamos. 🎁`;
     $('#msgBio').value = `🎁 ${c.eslogan || 'Los mejores desayunos y detalles de Medellín'}\n🥐 Desayunos sorpresa · Anchetas · Globos\n🚚 Entregas en ${c.ciudad||'Medellín'}\n👇 Haz tu pedido aquí`;
   }
@@ -993,14 +1025,14 @@ table.t tr:last-child td{border-bottom:0}
 
   // ---------- Clics generales ----------
   document.addEventListener('click', async e => {
-    const t = e.target.closest('button,a[data-confirmar],a[data-aviso],[data-cerrar]'); if (!t) return;
+    const t = e.target.closest('button,a[data-avanzar],a[data-aviso],[data-cerrar]'); if (!t) return;
     const d = t.dataset;
     if (d.tab){
       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
       ['productos','pedidos','ventas','categorias','mensajes','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
       return;
     }
-    if (d.confirmar){ cambiarEstadoPedido(d.confirmar, 'Confirmado', false); return; } // el enlace abre WhatsApp solo
+    if (d.avanzar){ cambiarEstadoPedido(d.avanzar, d.a, false); return; } // el enlace abre WhatsApp con el aviso
     if (d.aviso) return;
     if (d.enviarfoto){ enviarFoto(d.enviarfoto); return; }
     if (await accionCategoria(d)) return;

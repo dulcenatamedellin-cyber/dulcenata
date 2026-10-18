@@ -178,6 +178,7 @@
     },
     async estadoPedido(pin, id, estado) {
       if (DEMO) {
+        demoDb = demoLoad();
         const p = demoDb.pedidos.find(x => x.id === id);
         if (p) { p.estado = estado; p.historial = hist(p.historial); p.historial.push({ e: estado, t: new Date().toISOString() }); }
         demoSave(demoDb); return true;
@@ -186,14 +187,38 @@
     },
     async fotoEntrega(pin, id, url) {
       if (DEMO) {
+        demoDb = demoLoad();
         const p = demoDb.pedidos.find(x => x.id === id);
         if (p) { p.fotoEntrega = url; if (p.estado !== 'Entregado') { p.estado = 'Entregado'; p.historial = hist(p.historial); p.historial.push({ e: 'Entregado', t: new Date().toISOString() }); } }
         demoSave(demoDb); return true;
       }
       return post({ action: 'fotoEntrega', pin, id, url });
     },
+    // ----- Mensajero -----
+    async mensajeroLogin(pin) {
+      if (DEMO) { if (['5678', '1234'].indexOf(String(pin)) < 0) throw new Error('PIN incorrecto'); return true; }
+      return post({ action: 'mensajeroLogin', pin });
+    },
+    async mensajeroPedidos(pin) {
+      if (DEMO) { demoDb = demoLoad(); return demoDb.pedidos.filter(p => ['Confirmado', 'En preparación', 'En camino'].indexOf(p.estado) >= 0); }
+      return post({ action: 'mensajeroPedidos', pin });
+    },
+    async mensajeroEnCamino(pin, id) {
+      if (DEMO) return DN.estadoPedido(pin, id, 'En camino');
+      return post({ action: 'mensajeroEnCamino', pin, id });
+    },
+    async mensajeroEntregar(pin, id, dataUrl, quien) {
+      if (DEMO) {
+        demoDb = demoLoad();
+        const p = demoDb.pedidos.find(x => x.id === id);
+        if (p) { p.fotoEntrega = dataUrl; p.estado = 'Entregado'; p.historial = hist(p.historial); p.historial.push({ e: 'Entregado', t: new Date().toISOString(), por: 'mensajero', quien: quien || '' }); }
+        demoSave(demoDb); return { fotoEntrega: dataUrl };
+      }
+      return post({ action: 'mensajeroEntregar', pin, id, dataUrl, quien });
+    },
+
     async actualizarPedido(pin, id, campos) {
-      if (DEMO) { const p = demoDb.pedidos.find(x => x.id === id); if (p) Object.assign(p, campos); demoSave(demoDb); return true; }
+      if (DEMO) { demoDb = demoLoad(); const p = demoDb.pedidos.find(x => x.id === id); if (p) Object.assign(p, campos); demoSave(demoDb); return true; }
       return post({ action: 'actualizarPedido', pin, id, campos });
     },
     async guardarConfig(pin, config) {

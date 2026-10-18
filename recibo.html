@@ -50,6 +50,12 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 .pago{margin:16px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--rosa-suave);border-radius:14px;padding:12px 14px;flex-wrap:wrap}
 .pill{font-size:.78rem;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn)}
 .pill.ok{background:var(--ok-bg);color:var(--ok)}
+.entrega{margin:16px 24px 0;border:2px dashed var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.entrega h3{margin:0;font-family:var(--f-display);font-size:1.15rem;display:flex;align-items:center;gap:8px}
+.entrega img{width:100%;border-radius:12px;max-height:460px;object-fit:cover}
+.entrega p{margin:0;font-size:.88rem;color:var(--muted)}
+.sello-ok{display:inline-block;transform:rotate(-6deg);border:3px solid var(--ok);color:var(--ok);font-weight:800;letter-spacing:.08em;text-transform:uppercase;font-size:.8rem;padding:3px 10px;border-radius:8px;margin-left:auto}
+@media print{ .entrega img{max-height:320px} }
 .pie{text-align:center;padding:22px 24px 26px}
 .pie b{font-family:var(--f-display);font-style:italic;font-size:1.3rem;color:var(--rosa)}
 .pie p{margin:6px 0 0;color:var(--muted);font-size:.82rem}
@@ -104,6 +110,12 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 
   <div class="pago"><span>Medio de pago: <b id="rPago"></b></span><span class="pill" id="rEstadoPago"></span></div>
 
+  <section class="entrega" id="rEntrega" hidden>
+    <h3>📸 Entrega <span class="sello-ok">Entregado</span></h3>
+    <img id="rFoto" alt="Foto de la entrega">
+    <p id="rEntregaTxt"></p>
+  </section>
+
   <footer class="pie">
     <b>¡Gracias por tu compra!</b>
     <p id="rContacto"></p>
@@ -153,6 +165,14 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
       else if (p.estado && p.estado !== 'Pendiente' && p.estado !== 'Cancelado') { est = 'Pago verificado ✓'; ok = true; }
       if (p.estado === 'Cancelado') est = 'Pedido cancelado';
       $('#rEstadoPago').textContent = est; $('#rEstadoPago').classList.toggle('ok', ok);
+      if (p.estado === 'Entregado') {
+        const h = (p.historial || []).filter(x => x.e === 'Entregado').pop();
+        const cuando = h ? new Date(h.t).toLocaleString('es-CO',{weekday:'long',day:'numeric',month:'long',hour:'numeric',minute:'2-digit'}) : '';
+        const recibio = h && h.quien ? h.quien : (p.recibe || 'destinatario');
+        $('#rEntregaTxt').textContent = 'Recibió: ' + recibio + (cuando ? ' · ' + cuando : '');
+        if (p.fotoEntrega) { $('#rFoto').src = p.fotoEntrega; } else { $('#rFoto').hidden = true; }
+        $('#rEntrega').hidden = false;
+      }
       $('#rContacto').textContent = 'Encuéntranos en Instagram @' + String(c.instagram||'regalos_dulcenata').replace('@','') + ' · ' + (c.ciudad || 'Medellín');
       $('#btnVolver').href = 'pedido.html#' + DN.cel(tel);
       document.title = 'Recibo ' + p.id + ' · ' + (c.nombre || 'Dulcenata');

@@ -27,9 +27,9 @@ window.DULCENATA_CONFIG = {
 
   // Datos que ve el cliente al elegir cada medio de pago (se editan en el panel > Ajustes)
   pagosInfo: {
-    'Nequi': 'Nequi 300 000 0000 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
-    'Daviplata': 'Daviplata 300 000 0000 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
-    'Bancolombia': 'Cuenta de ahorros Bancolombia 000-000000-00 a nombre de Dulcenata. Envía el comprobante por WhatsApp.',
+    'Nequi': 'Al confirmar tu pedido te enviamos por WhatsApp los datos para pagar.',
+    'Daviplata': 'Al confirmar tu pedido te enviamos por WhatsApp los datos para pagar.',
+    'Bancolombia': 'Al confirmar tu pedido te enviamos por WhatsApp los datos para pagar.',
     'Efectivo': 'Pagas al recibir. Cuéntanos con cuánto vas a pagar para llevar las vueltas.'
   },
 
@@ -59,6 +59,6 @@ window.DULCENATA_CONFIG = {
   msgConfirmado:  '¡Hola {cliente}! 💝 Tu pedido *{pedido}* en {tienda} está *confirmado*.\n📅 Entrega: {entrega}\n\n🧾 Tu recibo de compra: {recibo}\n🔎 Síguelo aquí: {link}',
   msgPreparacion: '¡Hola {cliente}! 🎀 Ya estamos *preparando* tu pedido *{pedido}* con mucho amor.\n\nSíguelo aquí: {link}',
   msgCamino:      '¡Hola {cliente}! 🚗 Tu pedido *{pedido}* va *en camino* a donde {recibe}.\n\nSíguelo aquí: {link}',
-  msgEntregado:   '¡Hola {cliente}! ✅ Tu pedido *{pedido}* fue *entregado* a {recibe}.\n📸 Mira la foto de la entrega aquí: {link}\n\n¡Gracias por elegir {tienda}! 💖 Si te gustó, nos encantaría que nos etiquetaras en Instagram.',
+  msgEntregado:   '¡Hola {cliente}! ✅ Tu pedido *{pedido}* fue *entregado* a {recibe}.\n📸 Tu recibo con la foto de la entrega: {recibo}\n\n¡Gracias por elegir {tienda}! 💖 Si te gustó, nos encantaría que nos etiquetaras en Instagram.',
   msgCancelado:   'Hola {cliente}, tu pedido *{pedido}* fue cancelado. Si tienes preguntas, escríbenos por aquí.'
 };
