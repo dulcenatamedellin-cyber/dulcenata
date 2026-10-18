@@ -163,6 +163,32 @@ label.c small{color:var(--muted);font-weight:600}
 .banner-prev{width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:var(--rosa-suave)}
 .vars{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin:0 0 12px}
 .vars code{background:var(--rosa-suave);color:var(--rosa-hondo);padding:1px 6px;border-radius:6px;font-weight:700}
+/* Ventas */
+.cifra.link{cursor:pointer;transition:border-color .15s}
+.cifra.link:hover{border-color:var(--rosa)}
+.cifra.link span::after{content:" ›";color:var(--rosa)}
+.rangos{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.rangos button{border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 14px;font-weight:700;color:var(--muted)}
+.rangos button.on{background:var(--rosa);border-color:var(--rosa);color:#fff}
+.rangos input{padding:7px 10px;border-radius:10px;border:2px solid var(--line);background:var(--card)}
+.v-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:14px}
+.v-cols{display:grid;grid-template-columns:1.4fr 1fr;gap:14px;margin-bottom:14px}
+table.t{width:100%;border-collapse:collapse;font-size:.9rem}
+table.t th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+table.t td{padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+table.t td.n{text-align:right;white-space:nowrap}
+table.t tr:last-child td{border-bottom:0}
+.barra-h{height:8px;border-radius:99px;background:var(--rosa);opacity:.75;min-width:4px}
+.sonido{border:2px solid var(--line);background:var(--card);border-radius:10px;padding:6px 10px;font-weight:800;font-size:.85rem}
+.sonido.on{border-color:var(--rosa);color:var(--rosa)}
+.vivo{font-size:.78rem;color:var(--muted);display:inline-flex;align-items:center;gap:6px}
+.vivo::before{content:"";width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 3px rgba(34,197,94,.2)}
+.ped .comp{display:flex;gap:10px;align-items:center;background:var(--info-bg);border-radius:12px;padding:8px;font-size:.85rem}
+.ped .comp img{width:52px;height:52px;border-radius:8px;object-fit:cover}
+.ped .domi{display:flex;gap:8px;align-items:center;font-size:.88rem;flex-wrap:wrap}
+.ped .domi input{width:120px;padding:6px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg)}
+.ped.nuevo{animation:nuevo 2s ease-in-out 2}
+@keyframes nuevo{50%{box-shadow:0 0 0 5px var(--rosa-suave)}}
 /* Mensajes de tarjeta */
 .msg-form{display:grid;grid-template-columns:200px 1fr auto;gap:8px;align-items:start;margin-bottom:12px}
 .msg-form select,.msg-form input,.msg-form textarea{padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--card);outline:none;width:100%;min-width:0}
@@ -176,6 +202,8 @@ label.c small{color:var(--muted);font-weight:600}
 .msg small{color:var(--rosa);font-weight:800;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
 .msg textarea{width:100%;padding:8px 10px;border-radius:10px;border:2px solid var(--rosa);background:var(--bg);outline:none;resize:vertical}
 @media (max-width:760px){
+  .v-grid{grid-template-columns:1fr 1fr}
+  .v-cols{grid-template-columns:1fr}
   .msg-form{grid-template-columns:1fr}
   .msg{grid-template-columns:1fr}
   .cifras{grid-template-columns:repeat(2,1fr)}
@@ -216,6 +244,7 @@ label.c small{color:var(--muted);font-weight:600}
       <img src="logo.jpg" alt="">
       <h1>Panel <i>Dulcenata</i> <span></span></h1>
       <div class="sp"></div>
+      <button class="sonido" id="btnSonido" title="Sonido al llegar pedidos">🔕</button>
       <a class="btn btn-borde btn-sm" href="index.html" target="_blank" rel="noopener">Ver tienda</a>
       <button class="btn btn-borde btn-sm" id="salir">Salir</button>
     </div>
@@ -223,6 +252,7 @@ label.c small{color:var(--muted);font-weight:600}
   <nav class="tabs"><div class="wrap">
     <button class="tab on" data-tab="productos">Productos</button>
     <button class="tab" data-tab="pedidos">Pedidos <span class="n" id="nPend" hidden>0</span></button>
+    <button class="tab" data-tab="ventas">Ventas</button>
     <button class="tab" data-tab="categorias">Categorías</button>
     <button class="tab" data-tab="mensajes">Mensajes tarjeta</button>
     <button class="tab" data-tab="ajustes">Ajustes y enlaces</button>
@@ -233,7 +263,7 @@ label.c small{color:var(--muted);font-weight:600}
       <div class="cifra"><span>Productos visibles</span><b id="kAct">0</b></div>
       <div class="cifra"><span>Agotados</span><b id="kAgo">0</b></div>
       <div class="cifra"><span>Pedidos pendientes</span><b id="kPen">0</b></div>
-      <div class="cifra"><span>Ventas del mes</span><b id="kVen">$0</b></div>
+      <div class="cifra link" id="cifraVentas" role="button" tabindex="0" title="Ver detalle de ventas"><span>Ventas del mes</span><b id="kVen">$0</b></div>
     </div>
 
     <!-- PRODUCTOS -->
@@ -244,6 +274,26 @@ label.c small{color:var(--muted);font-weight:600}
         <button class="btn btn-rosa" id="nuevo">+ Nuevo producto</button>
       </div>
       <div class="lista" id="listaProd"></div>
+    </section>
+
+    <!-- VENTAS -->
+    <section id="tVentas" hidden>
+      <div class="rangos" id="rangos">
+        <button data-rango="hoy">Hoy</button><button data-rango="ayer">Ayer</button><button data-rango="semana">Últimos 7 días</button><button data-rango="mes" class="on">Este mes</button><button data-rango="mesant">Mes pasado</button>
+        <span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">Desde <input type="date" id="vDesde" aria-label="Desde"> hasta <input type="date" id="vHasta" aria-label="Hasta"></span>
+      </div>
+      <div class="v-grid">
+        <div class="cifra"><span>Vendido (productos)</span><b id="vTotal">$0</b></div>
+        <div class="cifra"><span>Pedidos</span><b id="vCant">0</b></div>
+        <div class="cifra"><span>Promedio por pedido</span><b id="vProm">$0</b></div>
+      </div>
+      <div class="v-cols">
+        <div class="panel" style="padding:12px;min-width:0"><h3 style="font-size:1.05rem;margin:4px 6px 8px">Productos vendidos</h3><div style="overflow-x:auto"><table class="t" id="vProd"></table></div></div>
+        <div class="panel" style="padding:12px;min-width:0"><h3 style="font-size:1.05rem;margin:4px 6px 8px">Por medio de pago</h3><div style="overflow-x:auto"><table class="t" id="vPago"></table></div>
+          <h3 style="font-size:1.05rem;margin:14px 6px 8px">Por día</h3><div style="overflow-x:auto"><table class="t" id="vDia"></table></div></div>
+      </div>
+      <div class="panel" style="padding:12px"><h3 style="font-size:1.05rem;margin:4px 6px 8px">Pedidos del período</h3><div style="overflow-x:auto"><table class="t" id="vPed"></table></div>
+        <p class="ayuda" style="margin:10px 6px 0">Cuenta todos los pedidos menos los cancelados, según la fecha en que el cliente hizo el pedido. Los domicilios no se suman.</p></div>
     </section>
 
     <!-- CATEGORÍAS -->
@@ -278,6 +328,7 @@ label.c small{color:var(--muted);font-weight:600}
           <option value="">Todos los pedidos</option><option>Pendiente</option><option>Confirmado</option><option>En preparación</option><option>En camino</option><option>Entregado</option><option>Cancelado</option>
         </select>
         <button class="btn btn-borde" id="recargar">Actualizar</button>
+        <span class="vivo" id="vivo">Se actualiza solo</span>
       </div>
       <div class="pedidos" id="listaPed"></div>
     </section>
@@ -294,6 +345,9 @@ label.c small{color:var(--muted);font-weight:600}
           <label class="c">Ciudad / zona de entregas<input id="aCiudad"></label>
           <label class="c">Medios de pago <small>separados por coma</small><input id="aPagos"></label>
           <label class="c full">Horario<input id="aHorario"></label>
+          <label class="c">Correo de la tienda <small>(sale en el recibo)</small><input id="aCorreo" type="email"></label>
+          <label class="c">NIT o cédula <small>(opcional, sale en el recibo)</small><input id="aNit"></label>
+          <label class="c full">Dirección o zona de la tienda <small>(sale en el recibo)</small><input id="aDireccionTienda"></label>
           <label class="c full">Nota de domicilio<input id="aDomicilio"></label>
         </div>
 
@@ -303,7 +357,7 @@ label.c small{color:var(--muted);font-weight:600}
 
         <h3 class="seccion">Mensajes para el cliente</h3>
         <p class="ayuda">Se envían por WhatsApp desde cada pedido con el botón verde. Puedes cambiarlos a tu gusto.</p>
-        <p class="vars">Palabras que se reemplazan solas: <code>{cliente}</code> <code>{pedido}</code> <code>{entrega}</code> <code>{recibe}</code> <code>{link}</code> (seguimiento con foto) <code>{tienda}</code></p>
+        <p class="vars">Palabras que se reemplazan solas: <code>{cliente}</code> <code>{pedido}</code> <code>{entrega}</code> <code>{recibe}</code> <code>{link}</code> (seguimiento con foto) <code>{recibo}</code> (recibo de compra) <code>{tienda}</code></p>
         <div class="grid2">
           <label class="c">Pedido confirmado<textarea id="aMsgConfirmado" rows="5"></textarea></label>
           <label class="c">En preparación<textarea id="aMsgPreparacion" rows="5"></textarea></label>
@@ -426,7 +480,7 @@ label.c small{color:var(--muted);font-weight:600}
     DATA = await DN.adminDatos(PIN);
     pintarTodo();
   }
-  function pintarTodo(){ pintarCifras(); pintarCats(); pintarListaCats(); pintarMensajes(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
+  function pintarTodo(){ titulo(); pintarVentas(); pintarCifras(); pintarCats(); pintarListaCats(); pintarMensajes(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
 
   // ---------- Cifras ----------
   function pintarCifras(){
@@ -630,6 +684,84 @@ label.c small{color:var(--muted);font-weight:600}
     catch(err){ p.estado = prev; pintarTodo(); toast('No se guardó: ' + err.message); }
   }
 
+  // ---------- Ventas ----------
+  const iso = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0,10); };
+  function rango(tipo){
+    const h = new Date(); h.setHours(0,0,0,0); let a = new Date(h), b = new Date(h);
+    if (tipo==='ayer'){ a.setDate(a.getDate()-1); b = new Date(a); }
+    if (tipo==='semana'){ a.setDate(a.getDate()-6); }
+    if (tipo==='mes'){ a.setDate(1); }
+    if (tipo==='mesant'){ a = new Date(h.getFullYear(), h.getMonth()-1, 1); b = new Date(h.getFullYear(), h.getMonth(), 0); }
+    $('#vDesde').value = iso(a); $('#vHasta').value = iso(b);
+    document.querySelectorAll('[data-rango]').forEach(x => x.classList.toggle('on', x.dataset.rango === tipo));
+    pintarVentas();
+  }
+  function pintarVentas(){
+    if (!$('#vDesde').value) { rango('mes'); return; }
+    const desde = $('#vDesde').value, hasta = $('#vHasta').value || desde;
+    const lista = DATA.pedidos.filter(p => p.estado !== 'Cancelado' && p.fecha && iso(p.fecha) >= desde && iso(p.fecha) <= hasta);
+    const total = lista.reduce((s,p)=>s+Number(p.total||0),0);
+    $('#vTotal').textContent = pesos(total); $('#vCant').textContent = lista.length; $('#vProm').textContent = pesos(lista.length ? Math.round(total/lista.length) : 0);
+    const prod = {}, pago = {}, dia = {};
+    lista.forEach(p => {
+      DN.lineas(p.productos).forEach(l => { const k = l.nombre; prod[k] = prod[k] || { cant:0, valor:0 }; prod[k].cant += l.cant; prod[k].valor += l.valor; });
+      const m = String(p.pago||'Sin dato').split('·')[0].trim(); pago[m] = pago[m] || { n:0, v:0 }; pago[m].n++; pago[m].v += Number(p.total||0);
+      const d = iso(p.fecha); dia[d] = dia[d] || { n:0, v:0 }; dia[d].n++; dia[d].v += Number(p.total||0);
+    });
+    const vacio = c => `<tr><td colspan="${c}" style="color:var(--muted);text-align:center;padding:18px">Sin ventas en estas fechas</td></tr>`;
+    const P = Object.entries(prod).sort((a,b)=>b[1].valor-a[1].valor), maxP = Math.max(1, ...P.map(x=>x[1].valor));
+    $('#vProd').innerHTML = '<tr><th>Producto</th><th style="text-align:right">Cant.</th><th style="text-align:right">Valor</th><th style="width:30%"></th></tr>' +
+      (P.length ? P.map(([n,v]) => `<tr><td>${esc(n)}</td><td class="n">${v.cant}</td><td class="n">${pesos(v.valor)}</td><td><div class="barra-h" style="width:${Math.round(v.valor/maxP*100)}%"></div></td></tr>`).join('') : vacio(4));
+    $('#vPago').innerHTML = '<tr><th>Medio</th><th style="text-align:right">Pedidos</th><th style="text-align:right">Valor</th></tr>' +
+      (Object.keys(pago).length ? Object.entries(pago).sort((a,b)=>b[1].v-a[1].v).map(([m,v]) => `<tr><td>${esc(m)}</td><td class="n">${v.n}</td><td class="n">${pesos(v.v)}</td></tr>`).join('') : vacio(3));
+    const fmtDia = d => { const [y,m,dd] = d.split('-').map(Number); return new Date(y,m-1,dd).toLocaleDateString('es-CO',{weekday:'short',day:'numeric',month:'short'}); };
+    $('#vDia').innerHTML = '<tr><th>Día</th><th style="text-align:right">Pedidos</th><th style="text-align:right">Valor</th></tr>' +
+      (Object.keys(dia).length ? Object.entries(dia).sort((a,b)=>b[0].localeCompare(a[0])).map(([d,v]) => `<tr><td>${esc(fmtDia(d))}</td><td class="n">${v.n}</td><td class="n">${pesos(v.v)}</td></tr>`).join('') : vacio(3));
+    $('#vPed').innerHTML = '<tr><th>Fecha</th><th>Código</th><th>Cliente</th><th>Estado</th><th style="text-align:right">Valor</th></tr>' +
+      (lista.length ? lista.map(p => `<tr><td>${esc(new Date(p.fecha).toLocaleString('es-CO',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}))}</td><td>${esc(p.id)}</td><td>${esc(p.cliente)}</td><td>${esc(p.estado)}</td><td class="n">${pesos(p.total)}</td></tr>`).join('') : vacio(5));
+  }
+  $('#vDesde').addEventListener('change', () => { document.querySelectorAll('[data-rango]').forEach(x=>x.classList.remove('on')); pintarVentas(); });
+  $('#vHasta').addEventListener('change', () => { document.querySelectorAll('[data-rango]').forEach(x=>x.classList.remove('on')); pintarVentas(); });
+  function irVentas(){ document.querySelector('[data-tab="ventas"]').click(); rango('mes'); }
+  $('#cifraVentas').addEventListener('click', irVentas);
+  $('#cifraVentas').addEventListener('keydown', e => { if (e.key==='Enter' || e.key===' ') { e.preventDefault(); irVentas(); } });
+
+  // ---------- Actualización automática + sonido ----------
+  let nuevosIds = new Set(), sonidoOn = false;
+  try { sonidoOn = localStorage.getItem('dn_sonido') === '1'; } catch(e){}
+  function pintarSonido(){ $('#btnSonido').textContent = sonidoOn ? '🔔 Sonido' : '🔕 Sin sonido'; $('#btnSonido').classList.toggle('on', sonidoOn); }
+  pintarSonido();
+  $('#btnSonido').addEventListener('click', () => {
+    sonidoOn = !sonidoOn; try { localStorage.setItem('dn_sonido', sonidoOn ? '1' : '0'); } catch(e){}
+    if (sonidoOn) { DN.desbloquearSonido(); setTimeout(()=>DN.sonar('pedido'), 60); }
+    pintarSonido();
+  });
+  document.addEventListener('pointerdown', () => { if (sonidoOn) DN.desbloquearSonido(); }, { once: true });
+  const firmaPed = L => JSON.stringify(L.map(p => [p.id, p.estado, p.fotoEntrega, p.comprobante, p.domicilio]));
+  function titulo(){ const n = DATA.pedidos.filter(p=>p.estado==='Pendiente').length; document.title = (n ? '(' + n + ') ' : '') + 'Panel Dulcenata'; }
+  async function refrescar(){
+    if (!PIN || document.hidden || $('#vApp').hidden) return;
+    const editando = document.activeElement && document.activeElement.closest && document.activeElement.closest('#listaPed') && /INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName);
+    try {
+      const d = await DN.adminDatos(PIN);
+      const antes = new Set(DATA.pedidos.map(p=>p.id));
+      const nuevos = d.pedidos.filter(p => !antes.has(p.id));
+      if (firmaPed(d.pedidos) !== firmaPed(DATA.pedidos)) {
+        DATA.pedidos = d.pedidos;
+        nuevosIds = new Set(nuevos.map(p=>p.id));
+        if (!editando) pintarPedidos();
+        pintarCifras(); if (!$('#tVentas').hidden) pintarVentas(); titulo();
+      }
+      if (nuevos.length) {
+        if (sonidoOn) DN.sonar('pedido');
+        toast(nuevos.length === 1 ? '🎁 Nuevo pedido de ' + String(nuevos[0].cliente||'').split(' ')[0] : '🎁 ' + nuevos.length + ' pedidos nuevos');
+      }
+      $('#vivo').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'});
+    } catch(e) { $('#vivo').textContent = 'Sin conexión, reintentando…'; }
+  }
+  setInterval(refrescar, 25000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) refrescar(); });
+
   // ---------- Mensajes de tarjeta ----------
   let filtroMsg = '', editMsg = -1, borrarMsg = -1;
   const MSGS = () => DN.mensajes(DATA.config);
@@ -693,7 +825,9 @@ label.c small{color:var(--muted);font-weight:600}
   function textoCliente(p, estado){
     const tpl = DATA.config[MSG[estado] || 'msgConfirmado'] || '';
     const nombre = String(p.cliente||'').replace(/\(.*?\)/g,'').trim().split(' ')[0];
-    return tpl.replace(/\{cliente\}/g, nombre).replace(/\{pedido\}/g, p.id).replace(/\{entrega\}/g, p.fechaEntrega || 'por confirmar')
+    let t = tpl;
+    if (estado === 'Confirmado' && t.indexOf('{recibo}') < 0) t += '\n\n🧾 Tu recibo de compra: {recibo}';
+    return t.replace(/\{recibo\}/g, DN.linkRecibo(p)).replace(/\{cliente\}/g, nombre).replace(/\{pedido\}/g, p.id).replace(/\{entrega\}/g, p.fechaEntrega || 'por confirmar')
       .replace(/\{recibe\}/g, p.recibe || 'tu ser querido').replace(/\{link\}/g, DN.linkSeguimiento(p.telefono)).replace(/\{tienda\}/g, DATA.config.nombre || 'Dulcenata');
   }
   const linkCliente = (p, estado) => 'https://wa.me/' + DN.telWa(p.telefono) + '?text=' + encodeURIComponent(textoCliente(p, estado));
@@ -713,6 +847,7 @@ label.c small{color:var(--muted);font-weight:600}
         html += `<span class="btn btn-borde btn-sm subir-foto">📷 Foto de entrega<input type="file" accept="image/*" data-fotoped="${esc(p.id)}"></span>`;
     }
     html += `<a class="btn btn-borde btn-sm" href="${esc(DN.linkSeguimiento(p.telefono))}" target="_blank" rel="noopener">Ver seguimiento</a>`;
+    if (p.estado !== 'Cancelado') html += `<a class="btn btn-borde btn-sm" href="${esc(DN.linkRecibo(p))}" target="_blank" rel="noopener">🧾 Recibo</a>`;
     return `<div class="avisar">${html}</div>`;
   }
 
@@ -722,7 +857,7 @@ label.c small{color:var(--muted);font-weight:600}
     if (!lista.length){ $('#listaPed').innerHTML = `<div class="vacio" style="grid-column:1/-1">Aquí aparecerán los pedidos que hagan tus clientes desde la tienda.</div>`; return; }
     $('#listaPed').innerHTML = lista.map(p => {
       const fecha = p.fecha ? new Date(p.fecha).toLocaleString('es-CO',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}) : '';
-      return `<article class="ped" data-e="${esc(p.estado)}" data-id="${esc(p.id)}">
+      return `<article class="ped ${nuevosIds.has(p.id)?'nuevo':''}" data-e="${esc(p.estado)}" data-id="${esc(p.id)}">
         <div class="top"><b>${esc(p.id)}</b><small>${esc(fecha)}</small></div>
         <div class="dato"><b>Cliente:</b> ${esc(p.cliente)} · <a href="https://wa.me/${DN.telWa(p.telefono)}" target="_blank" rel="noopener" style="color:var(--rosa)">${esc(p.telefono)}</a></div>
         ${p.recibe?`<div class="dato"><b>Recibe:</b> ${esc(p.recibe)}</div>`:''}
@@ -731,6 +866,10 @@ label.c small{color:var(--muted);font-weight:600}
         <pre>${esc(p.productos)}</pre>
         ${p.mensaje?`<div class="dato"><b>Tarjeta:</b> <i>${esc(p.mensaje)}</i></div>`:''}
         ${p.notas?`<div class="dato"><b>Notas:</b> ${esc(p.notas)}</div>`:''}
+        ${p.comprobante ? `<a class="comp" href="${esc(p.comprobante)}" target="_blank" rel="noopener"><img src="${esc(p.comprobante)}" alt="Comprobante de pago"><span><b>📎 Comprobante de pago</b><br>Toca para verlo en grande</span></a>`
+          : (!DN.esEfectivo(p.pago) && p.estado === 'Pendiente' ? `<div class="dato" style="color:var(--warn)"><b style="color:var(--warn)">Pago:</b> revisa el comprobante en WhatsApp antes de confirmar</div>` : '')}
+        <label class="domi"><b style="color:var(--muted)">Domicilio $</b><input type="text" inputmode="numeric" data-domi="${esc(p.id)}" value="${p.domicilio ? Number(p.domicilio).toLocaleString('es-CO') : ''}" placeholder="0">
+          <span>Total con domicilio: <b>${pesos(Number(p.total||0) + Number(p.domicilio||0))}</b></span></label>
         <div class="pie"><span class="tot">${pesos(p.total)} <small style="font-weight:600">· ${esc(p.pago||'')}</small></span>
           <select data-ped="${esc(p.id)}" aria-label="Estado del pedido">${ESTADOS.map(s=>`<option ${s===p.estado?'selected':''}>${s}</option>`).join('')}</select></div>
         ${bloqueAviso(p)}
@@ -740,7 +879,7 @@ label.c small{color:var(--muted);font-weight:600}
 
   async function cambiarEstadoPedido(id, v, pulso){
     const p = DATA.pedidos.find(x=>x.id===id); if (!p) return;
-    const prev = p.estado; p.estado = v; pintarPedidos(); pintarCifras();
+    const prev = p.estado; p.estado = v; pintarPedidos(); pintarCifras(); titulo();
     if (pulso){ const a = document.querySelector(`[data-aviso="${CSS.escape(id)}"]`); if (a) a.classList.add('pulso'); }
     try { await DN.estadoPedido(PIN, id, v); toast(`${id}: ${v}` + (pulso && MSG[v] && v!=='Entregado' ? ' · toca el botón verde para avisarle' : '')); }
     catch(err){ p.estado = prev; pintarPedidos(); pintarCifras(); toast('No se guardó el estado'); }
@@ -751,6 +890,13 @@ label.c small{color:var(--muted);font-weight:600}
 
   document.addEventListener('change', async e => {
     const t = e.target;
+    if (t.dataset.domi){
+      const id = t.dataset.domi, v = Number(String(t.value).replace(/\D/g,'')) || 0;
+      const p = DATA.pedidos.find(x=>x.id===id); const prev = p.domicilio; p.domicilio = v;
+      try { await DN.actualizarPedido(PIN, id, { domicilio: v }); pintarPedidos(); toast('Domicilio guardado: ' + pesos(v)); }
+      catch(err){ p.domicilio = prev; toast('No se guardó el domicilio'); }
+      return;
+    }
     if (t.dataset.ped) return cambiarEstadoPedido(t.dataset.ped, t.value, true);
     if (t.dataset.fotoped){
       const id = t.dataset.fotoped, f = t.files[0]; if (!f) return;
@@ -796,7 +942,7 @@ label.c small{color:var(--muted);font-weight:600}
   }
 
   // ---------- Ajustes ----------
-  const CAMPOS = ['nombre','eslogan','whatsapp','instagram','ciudad','pagos','horario','domicilio','msgConfirmado','msgPreparacion','msgCamino','msgEntregado','msgCancelado'];
+  const CAMPOS = ['nombre','eslogan','whatsapp','instagram','ciudad','pagos','horario','domicilio','correo','nit','direccionTienda','msgConfirmado','msgPreparacion','msgCamino','msgEntregado','msgCancelado'];
   const idCampo = k => '#a' + k[0].toUpperCase() + k.slice(1);
   function pintarPagosInfo(){
     const info = DN.pagosInfo(DATA.config);
@@ -851,7 +997,7 @@ label.c small{color:var(--muted);font-weight:600}
     const d = t.dataset;
     if (d.tab){
       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
-      ['productos','pedidos','categorias','mensajes','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
+      ['productos','pedidos','ventas','categorias','mensajes','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
       return;
     }
     if (d.confirmar){ cambiarEstadoPedido(d.confirmar, 'Confirmado', false); return; } // el enlace abre WhatsApp solo
@@ -859,6 +1005,7 @@ label.c small{color:var(--muted);font-weight:600}
     if (d.enviarfoto){ enviarFoto(d.enviarfoto); return; }
     if (await accionCategoria(d)) return;
     if (await accionMensaje(d)) return;
+    if (d.rango){ rango(d.rango); return; }
     if (t.id==='nuevo') return abrirProducto(null);
     if (d.editar) return abrirProducto(DATA.productos.find(x=>x.id===d.editar));
     if (d.dup){ const o = DATA.productos.find(x=>x.id===d.dup); abrirProducto(Object.assign({}, o, { nombre: o.nombre + ' (copia)' })); editId = null; $('#tituloProd').textContent='Nuevo producto (copia)'; return; }

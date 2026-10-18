@@ -7,7 +7,7 @@
   const CFG = window.DULCENATA_CONFIG || {};
   const API = (CFG.API_URL || '').trim();
   const DEMO = !API;
-  const LS_KEY = 'dulcenata_demo_v3';
+  const LS_KEY = 'dulcenata_demo_v4';
 
   // ---------- Imagen de ejemplo (SVG) ----------
   function placeholder(emoji, c1, c2) {
@@ -95,6 +95,7 @@
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 
     async tienda() {
+      if (DEMO) demoDb = demoLoad();
       if (DEMO) return { config: mergeConfig(demoDb.config), productos: demoDb.productos.slice() };
       const d = await get({ action: 'tienda' });
       return { config: mergeConfig(d.config), productos: d.productos };
@@ -106,6 +107,7 @@
       if (c.length < 7) throw new Error('Escribe tu número de celular completo');
       let d;
       if (DEMO) {
+        demoDb = demoLoad();
         d = { config: demoDb.config, pedidos: demoDb.pedidos.filter(p => DN.cel(p.telefono) === c).map(p => Object.assign({}, p, {
           cliente: String(p.cliente).split(' ')[0], recibe: String(p.recibe || '').split(' ')[0], direccion: undefined, telefono: undefined })) };
       } else d = await get({ action: 'seguimiento', tel: c });
@@ -119,11 +121,26 @@
       if (DEMO) {
         const id = pedido.id || DN.nuevoId();
         const t = new Date().toISOString();
-        demoDb.pedidos.unshift(Object.assign({ fecha: t, fotoEntrega: '' }, pedido, { id, estado: 'Pendiente', historial: [{ e: 'Pendiente', t }] }));
+        demoDb = demoLoad();
+        const p = Object.assign({ fecha: t, fotoEntrega: '', domicilio: '' }, pedido, { id, estado: 'Pendiente', historial: [{ e: 'Pendiente', t }] });
+        p.comprobante = p.comprobanteData || ''; delete p.comprobanteData;
+        demoDb.pedidos.unshift(p);
         demoSave(demoDb);
         return { id };
       }
       return post({ action: 'crearPedido', pedido });
+    },
+
+    async recibo(tel, id) {
+      let d;
+      if (DEMO) {
+        demoDb = demoLoad();
+        const p = demoDb.pedidos.find(x => x.id === id && DN.cel(x.telefono) === DN.cel(tel));
+        if (!p) throw new Error('Recibo no encontrado');
+        d = Object.assign({}, p, { config: demoDb.config });
+      } else d = await get({ action: 'recibo', tel: DN.cel(tel), id });
+      d.config = mergeConfig(d.config); d.historial = hist(d.historial);
+      return d;
     },
 
     // ----- Admin -----
@@ -133,7 +150,7 @@
     },
     async adminDatos(pin) {
       let d;
-      if (DEMO) d = { config: demoDb.config, productos: demoDb.productos.slice(), pedidos: demoDb.pedidos.slice() };
+      if (DEMO) { demoDb = demoLoad(); d = { config: demoDb.config, productos: demoDb.productos.slice(), pedidos: demoDb.pedidos.slice() }; }
       else d = await post({ action: 'adminDatos', pin });
       d.config = mergeConfig(d.config);
       d.pedidos.forEach(p => p.historial = hist(p.historial));
@@ -175,6 +192,10 @@
       }
       return post({ action: 'fotoEntrega', pin, id, url });
     },
+    async actualizarPedido(pin, id, campos) {
+      if (DEMO) { const p = demoDb.pedidos.find(x => x.id === id); if (p) Object.assign(p, campos); demoSave(demoDb); return true; }
+      return post({ action: 'actualizarPedido', pin, id, campos });
+    },
     async guardarConfig(pin, config) {
       if (DEMO) { demoDb.config = Object.assign({}, demoDb.config, config); demoSave(demoDb); return true; }
       return post({ action: 'guardarConfig', pin, config });
@@ -189,6 +210,43 @@
     base() { return location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, ''); },
     cel(t) { return String(t || '').replace(/\D/g, '').slice(-10); },          // últimos 10 dígitos
     linkSeguimiento(tel) { return DN.base() + 'pedido.html#' + DN.cel(tel); },  // seguimiento por celular
+    linkRecibo(p) { return DN.base() + 'recibo.html#' + DN.cel(p.telefono) + '-' + p.id; },
+    // Productos guardados como "1 x Nombre ($85.000)" -> [{cant, nombre, valor}]
+    lineas(txt) {
+      return String(txt || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => {
+        const m = l.match(/^(\d+)\s*x\s*(.+?)\s*\((\$[\d.,]+)\)\s*$/i);
+        return m ? { cant: Number(m[1]), nombre: m[2], valor: Number(m[3].replace(/\D/g, '')) } : { cant: 1, nombre: l, valor: 0 };
+      });
+    },
+
+    // ----- Sonido de aviso: dos notas suaves (campanita) -----
+    _ctx: null,
+    desbloquearSonido() {
+      try {
+        if (!DN._ctx) DN._ctx = new (window.AudioContext || window.webkitAudioContext)();
+        if (DN._ctx.state === 'suspended') DN._ctx.resume();
+        return true;
+      } catch (e) { return false; }
+    },
+    sonar(tipo) {
+      try {
+        if (!DN._ctx) DN.desbloquearSonido();
+        const ctx = DN._ctx; if (!ctx || ctx.state !== 'running') return false;
+        const notas = tipo === 'estado' ? [784, 1175] : [880, 1319, 1760];   // estado: 2 notas · pedido nuevo: 3 notas
+        notas.forEach((f, i) => {
+          const t0 = ctx.currentTime + i * 0.16;
+          const o = ctx.createOscillator(), g = ctx.createGain();
+          o.type = 'sine'; o.frequency.value = f;
+          g.gain.setValueAtTime(0.0001, t0);
+          g.gain.exponentialRampToValueAtTime(0.09, t0 + 0.02);
+          g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.9);
+          o.connect(g).connect(ctx.destination); o.start(t0); o.stop(t0 + 1);
+        });
+        if (navigator.vibrate) try { navigator.vibrate(tipo === 'estado' ? [60, 60, 60] : 120); } catch (e) {}
+        return true;
+      } catch (e) { return false; }
+    },
+
     nuevoId() { return 'DN-' + Date.now().toString(36).slice(-4).toUpperCase(); } // código corto, ej: DN-7QK2
   };
 })();

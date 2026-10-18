@@ -20,6 +20,9 @@ window.DULCENATA_CONFIG = {
   domicilio: 'Domicilio según la zona. Te confirmamos el valor por WhatsApp.',
   pagos: 'Nequi, Daviplata, Bancolombia, Efectivo',
   banner: '',               // vacío = usa banner.jpg
+  correo: 'dulcenatamedellin@gmail.com',
+  direccionTienda: 'Medellín, Antioquia',
+  nit: '',                  // NIT o cédula (opcional, sale en el recibo)
   categorias: '["Desayunos sorpresa","Anchetas","Detalles dulces","Globos","Flores","Peluches"]',
 
   // Datos que ve el cliente al elegir cada medio de pago (se editan en el panel > Ajustes)
@@ -52,8 +55,8 @@ window.DULCENATA_CONFIG = {
     { cat: 'Perdón', texto: 'Lo siento. Eres muy importante para mí y quiero arreglar las cosas.' }
   ],
 
-  // Mensajes al cliente. Puedes usar: {cliente} {pedido} {entrega} {recibe} {link} {tienda}
-  msgConfirmado:  '¡Hola {cliente}! 💝 Tu pedido *{pedido}* en {tienda} está *confirmado*.\n📅 Entrega: {entrega}\n\nPuedes seguirlo aquí: {link}',
+  // Mensajes al cliente. Puedes usar: {cliente} {pedido} {entrega} {recibe} {link} {recibo} {tienda}
+  msgConfirmado:  '¡Hola {cliente}! 💝 Tu pedido *{pedido}* en {tienda} está *confirmado*.\n📅 Entrega: {entrega}\n\n🧾 Tu recibo de compra: {recibo}\n🔎 Síguelo aquí: {link}',
   msgPreparacion: '¡Hola {cliente}! 🎀 Ya estamos *preparando* tu pedido *{pedido}* con mucho amor.\n\nSíguelo aquí: {link}',
   msgCamino:      '¡Hola {cliente}! 🚗 Tu pedido *{pedido}* va *en camino* a donde {recibe}.\n\nSíguelo aquí: {link}',
   msgEntregado:   '¡Hola {cliente}! ✅ Tu pedido *{pedido}* fue *entregado* a {recibe}.\n📸 Mira la foto de la entrega aquí: {link}\n\n¡Gracias por elegir {tienda}! 💖 Si te gustó, nos encantaría que nos etiquetaras en Instagram.',

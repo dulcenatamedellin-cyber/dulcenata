@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Recibo Dulcenata</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="color-scheme" content="light only">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#d81b70">
+<link rel="icon" href="logo.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,700;1,9..144,700&family=Nunito:wght@400;600;700;800&display=swap">
+<style>
+/* Layout: recibo tipo papel de regalo — cinta fucsia arriba, logo centrado, tabla de productos, totales y pie con datos de la tienda. */
+:root{
+  --rosa:#d81b70; --rosa-hondo:#9c1150; --rosa-suave:#fde3ee; --sol:#ffd60a;
+  --bg:#fbf1f5; --card:#ffffff; --fg:#2b1420; --muted:#7c5b6b; --line:#f0dbe5; --ok:#15803d; --ok-bg:#dcfce7; --warn:#a16207; --warn-bg:#fef3c7;
+  --f-display:'Fraunces', Georgia, serif; --f-body:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+html{color-scheme:light only}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-body);line-height:1.5;padding-block:24px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+img{max-width:100%;display:block}
+h1,h2{font-family:var(--f-display);margin:0;line-height:1.15}
+.hoja{max-width:620px;margin:0 auto;background:var(--card);border-radius:22px;overflow:hidden;box-shadow:0 18px 50px -24px rgba(156,17,80,.35);position:relative}
+.cinta{height:14px;background:repeating-linear-gradient(135deg,var(--rosa) 0 18px,#e94d93 18px 36px)}
+.cab{text-align:center;padding:26px 24px 18px;border-bottom:2px dashed var(--line)}
+.cab img{width:96px;height:96px;border-radius:50%;margin:0 auto 10px;box-shadow:0 0 0 4px var(--sol)}
+.cab h1{font-style:italic;color:var(--rosa);font-size:2rem}
+.cab .esl{color:var(--muted);margin:2px 0 8px}
+.cab .datos{font-size:.82rem;color:var(--muted);display:flex;flex-wrap:wrap;justify-content:center;gap:4px 14px}
+.titulo{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;padding:20px 24px 6px;flex-wrap:wrap}
+.titulo small{display:block;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.titulo h2{font-size:1.5rem}
+.num{font-family:var(--f-display);font-size:1.25rem;color:var(--rosa-hondo);text-align:right}
+.info{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;padding:12px 24px 16px;font-size:.92rem}
+.info span{display:block;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.tabla{padding:0 24px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.94rem}
+th{text-align:left;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:10px 6px;border-bottom:2px solid var(--line)}
+td{padding:10px 6px;border-bottom:1px solid var(--line);vertical-align:top}
+td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.totales{padding:12px 24px 4px;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.totales div{display:flex;justify-content:space-between;gap:30px;width:min(100%,300px);font-variant-numeric:tabular-nums}
+.totales .gran{border-top:2px solid var(--fg);padding-top:8px;margin-top:4px;font-weight:800;font-size:1.25rem}
+.totales .gran b{color:var(--rosa)}
+.pago{margin:16px 24px 0;display:flex;justify-content:space-between;align-items:center;gap:12px;background:var(--rosa-suave);border-radius:14px;padding:12px 14px;flex-wrap:wrap}
+.pill{font-size:.78rem;font-weight:800;padding:4px 10px;border-radius:999px;background:var(--warn-bg);color:var(--warn)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pie{text-align:center;padding:22px 24px 26px}
+.pie b{font-family:var(--f-display);font-style:italic;font-size:1.3rem;color:var(--rosa)}
+.pie p{margin:6px 0 0;color:var(--muted);font-size:.82rem}
+.legal{font-size:.72rem!important;opacity:.8;margin-top:12px!important}
+.acciones{max-width:620px;margin:16px auto 0;display:flex;gap:10px;flex-wrap:wrap}
+.btn{flex:1;display:flex;align-items:center;justify-content:center;gap:8px;border-radius:999px;padding:13px 18px;font:inherit;font-weight:800;text-decoration:none;cursor:pointer;border:2px solid var(--rosa);background:var(--rosa);color:#fff;min-width:200px}
+.btn.sec{background:transparent;color:var(--rosa)}
+.error{max-width:460px;margin:40px auto;text-align:center;background:var(--card);border-radius:20px;padding:28px}
+@media (max-width:520px){ .info{grid-template-columns:1fr} .cab h1{font-size:1.7rem} }
+@media print{
+  body{background:#fff;padding:0}
+  .hoja{box-shadow:none;border-radius:0;max-width:none}
+  .acciones,.demo{display:none!important}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+.demo{max-width:620px;margin:0 auto 12px;background:var(--sol);color:#2b1420;text-align:center;font-size:.85rem;font-weight:700;padding:6px 12px;border-radius:12px}
+</style>
+</head>
+<body>
+<div class="demo" id="avisoDemo" hidden>Recibo de demostración</div>
+
+<div class="error" id="error" hidden>
+  <h2 style="font-size:1.4rem;margin-bottom:8px">No encontramos este recibo</h2>
+  <p style="color:var(--muted)">Revisa que el enlace esté completo o escríbenos por WhatsApp.</p>
+  <a class="btn" href="pedido.html" style="margin-top:12px">Consultar mi pedido</a>
+</div>
+
+<article class="hoja" id="hoja" hidden>
+  <div class="cinta"></div>
+  <header class="cab">
+    <img src="logo.jpg" alt="Logo Dulcenata">
+    <h1 id="rNombre">Dulcenata</h1>
+    <p class="esl" id="rEslogan"></p>
+    <div class="datos" id="rDatos"></div>
+  </header>
+
+  <div class="titulo">
+    <div><small>Comprobante</small><h2>Recibo de compra</h2></div>
+    <div class="num"><small style="font-family:var(--f-body)">N.°</small><span id="rNum"></span></div>
+  </div>
+
+  <div class="info" id="rInfo"></div>
+
+  <div class="tabla">
+    <table>
+      <thead><tr><th>Producto</th><th class="n">Cant.</th><th class="n">Valor</th></tr></thead>
+      <tbody id="rItems"></tbody>
+    </table>
+  </div>
+
+  <div class="totales" id="rTotales"></div>
+
+  <div class="pago"><span>Medio de pago: <b id="rPago"></b></span><span class="pill" id="rEstadoPago"></span></div>
+
+  <footer class="pie">
+    <b>¡Gracias por tu compra!</b>
+    <p id="rContacto"></p>
+    <p class="legal">Este documento es un comprobante de compra y no reemplaza la factura electrónica.</p>
+  </footer>
+</article>
+
+<div class="acciones" id="acciones" hidden>
+  <button class="btn" id="btnPdf" type="button">⬇️ Guardar como PDF</button>
+  <a class="btn sec" id="btnVolver" href="pedido.html">Ver estado de mi pedido</a>
+</div>
+
+<script src="config.js"></script>
+<script src="api.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s), esc = DN.esc, pesos = DN.pesos;
+  if (DN.DEMO) $('#avisoDemo').hidden = false;
+  const h = location.hash.slice(1), i = h.indexOf('-');
+  const tel = i > 0 ? h.slice(0, i) : '', id = i > 0 ? h.slice(i + 1) : '';
+
+  async function cargar(){
+    try {
+      const p = await DN.recibo(tel, id), c = p.config;
+      $('#rNombre').textContent = c.nombre || 'Dulcenata';
+      $('#rEslogan').textContent = c.eslogan || '';
+      const datos = [c.nit ? 'NIT/CC ' + c.nit : '', c.direccionTienda || c.ciudad || '', c.whatsapp ? 'WhatsApp +' + String(c.whatsapp).replace(/\D/g,'') : '', c.correo || '', c.instagram ? '@' + String(c.instagram).replace('@','') : ''].filter(Boolean);
+      $('#rDatos').innerHTML = datos.map(d => `<span>${esc(d)}</span>`).join('');
+      $('#rNum').textContent = p.id;
+      const fecha = p.fecha ? new Date(p.fecha).toLocaleString('es-CO',{day:'numeric',month:'long',year:'numeric',hour:'numeric',minute:'2-digit'}) : '';
+      $('#rInfo').innerHTML = `
+        <div><span>Fecha</span>${esc(fecha)}</div>
+        <div><span>Cliente</span>${esc(String(p.cliente||'').replace(/\(.*?\)/g,'').trim())}</div>
+        <div><span>Celular</span>${esc(p.telefono||'')}</div>
+        <div><span>Para</span>${esc(p.recibe||'')}</div>
+        ${p.fechaEntrega ? `<div style="grid-column:1/-1"><span>Entrega</span>${esc(p.fechaEntrega)}</div>` : ''}`;
+      const items = DN.lineas(p.productos);
+      $('#rItems').innerHTML = items.map(l => `<tr><td>${esc(l.nombre)}</td><td class="n">${l.cant}</td><td class="n">${l.valor ? pesos(l.valor) : ''}</td></tr>`).join('');
+      const sub = Number(p.total||0), dom = Number(p.domicilio||0);
+      $('#rTotales').innerHTML = `<div><span>Subtotal productos</span><span>${pesos(sub)}</span></div>
+        <div><span>Domicilio</span><span>${dom ? pesos(dom) : 'Por confirmar'}</span></div>
+        <div class="gran"><span>Total</span><b>${pesos(sub + dom)}</b></div>`;
+      const medio = String(p.pago||'').trim();
+      $('#rPago').textContent = medio || '—';
+      let est = 'Pago por verificar', ok = false;
+      if (DN.esEfectivo(medio)) { est = p.estado === 'Entregado' ? 'Pagado al recibir ✓' : 'Pago contra entrega'; ok = p.estado === 'Entregado'; }
+      else if (p.estado && p.estado !== 'Pendiente' && p.estado !== 'Cancelado') { est = 'Pago verificado ✓'; ok = true; }
+      if (p.estado === 'Cancelado') est = 'Pedido cancelado';
+      $('#rEstadoPago').textContent = est; $('#rEstadoPago').classList.toggle('ok', ok);
+      $('#rContacto').textContent = 'Encuéntranos en Instagram @' + String(c.instagram||'regalos_dulcenata').replace('@','') + ' · ' + (c.ciudad || 'Medellín');
+      $('#btnVolver').href = 'pedido.html#' + DN.cel(tel);
+      document.title = 'Recibo ' + p.id + ' · ' + (c.nombre || 'Dulcenata');
+      $('#hoja').hidden = false; $('#acciones').hidden = false;
+    } catch(e) { $('#error').hidden = false; }
+  }
+  $('#btnPdf').addEventListener('click', () => { try { window.print(); } catch(e){} });
+  window.addEventListener('hashchange', () => location.reload());
+  cargar();
+})();
+</script>
+</body>
+</html>

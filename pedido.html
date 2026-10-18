@@ -63,6 +63,11 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
 .otro{display:flex;justify-content:space-between;gap:10px;align-items:center;width:100%;border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 14px;font:inherit;color:inherit;cursor:pointer;text-align:left;margin-top:8px}
 .otro small{color:var(--muted)}
 .otro .pill{font-size:.75rem;font-weight:800;background:var(--rosa-suave);color:var(--rosa-hondo);border-radius:999px;padding:3px 10px;white-space:nowrap}
+.aviso-son{display:flex;align-items:center;justify-content:center;gap:8px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:10px 16px;font:inherit;font-weight:800;color:var(--muted);cursor:pointer}
+.aviso-son.on{border-color:var(--rosa);color:var(--rosa)}
+.estado.cambio{animation:cambio 1.6s ease-in-out 2}
+@keyframes cambio{50%{box-shadow:0 0 0 6px var(--rosa-suave)}}
+.vivo{font-size:.78rem;color:var(--muted);text-align:center}
 .cambiar{background:none;border:0;color:var(--muted);text-decoration:underline;font:inherit;cursor:pointer;align-self:center}
 </style>
 </head>
@@ -93,6 +98,9 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
       <div class="card"><ol class="linea" id="linea"></ol></div>
       <div class="card det" id="det"></div>
       <div class="card otros" id="otros" hidden></div>
+      <button class="aviso-son" id="btnAviso" type="button">🔔 Avisarme con sonido cuando cambie</button>
+      <p class="vivo" id="vivo">Esta página se actualiza sola</p>
+      <a class="btn sec" id="lnkRecibo" href="#" target="_blank" rel="noopener" hidden>🧾 Ver mi recibo de compra</a>
       <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Escribir a Dulcenata por WhatsApp</a>
       <a class="btn sec" href="index.html">Ver más regalos</a>
       <button class="cambiar" id="cambiar" type="button">Consultar otro número</button>
@@ -157,17 +165,43 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
     $('#otros').hidden = !otros.length;
     $('#otros').innerHTML = '<h2>Tus otros pedidos</h2>' + otros.map(({o,k}) => `<button class="otro" data-i="${k}">
       <span><b>${esc(String(o.productos||'').split('\n')[0])}</b><br><small>${esc(corto(o.fecha))}</small></span><span class="pill">${esc(o.estado)}</span></button>`).join('');
+    const conRecibo = p.estado !== 'Pendiente' && p.estado !== 'Cancelado';
+    $('#lnkRecibo').hidden = !conRecibo;
+    if (conRecibo) $('#lnkRecibo').href = DN.base() + 'recibo.html#' + tel + '-' + p.id;
     $('#wa').href = 'https://wa.me/' + String(c.whatsapp||'').replace(/\D/g,'') + '?text=' + encodeURIComponent('Hola, quiero preguntar por mi pedido (' + p.id + ', celular ' + bonito(tel) + ')');
     document.title = 'Mi pedido · ' + p.estado;
-    window.scrollTo(0,0);
   }
 
-  $('#otros').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) mostrar(Number(b.dataset.i)); });
+  $('#otros').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) { mostrar(Number(b.dataset.i)); window.scrollTo(0,0); } });
   $('#fBuscar').addEventListener('submit', e => { e.preventDefault(); const c = DN.cel($('#qTel').value); if (location.hash.slice(1) === c) cargar(c); else location.hash = c; });
   $('#cambiar').addEventListener('click', () => { $('#qTel').value = ''; mostrarBuscar(); });
   window.addEventListener('hashchange', () => cargar(location.hash.slice(1)));
   cargar(location.hash.slice(1));
-  setInterval(() => { if (tel && !$('#vista').hidden) DN.seguimiento(tel).then(d => { DATOS = d; mostrar(0); }).catch(()=>{}); }, 90000);
+  // Se actualiza solo cada 30 s; si cambia el estado suena un tono suave
+  let sonido = false, viendo = 0;
+  const firma = d => JSON.stringify(d.pedidos.map(p => [p.id, p.estado, p.fotoEntrega]));
+  $('#btnAviso').addEventListener('click', () => {
+    sonido = !sonido;
+    if (sonido) { DN.desbloquearSonido(); setTimeout(()=>DN.sonar('estado'), 60); }
+    $('#btnAviso').classList.toggle('on', sonido);
+    $('#btnAviso').textContent = sonido ? '🔔 Te avisaremos con sonido' : '🔔 Avisarme con sonido cuando cambie';
+  });
+  $('#otros').addEventListener('click', e => { const b = e.target.closest('[data-i]'); if (b) viendo = Number(b.dataset.i); });
+  async function revisar(){
+    if (!tel || $('#vista').hidden || document.hidden) return;
+    try {
+      const d = await DN.seguimiento(tel);
+      if (firma(d) !== firma(DATOS)) {
+        const idActual = DATOS.pedidos[viendo] && DATOS.pedidos[viendo].id;
+        const cambioEstado = d.pedidos.some(p => { const a = DATOS.pedidos.find(x=>x.id===p.id); return a && (a.estado !== p.estado || a.fotoEntrega !== p.fotoEntrega); });
+        DATOS = d; viendo = Math.max(0, d.pedidos.findIndex(p => p.id === idActual)); mostrar(viendo);
+        if (cambioEstado) { if (sonido) DN.sonar('estado'); $('.estado').classList.remove('cambio'); void $('.estado').offsetWidth; $('.estado').classList.add('cambio'); }
+      }
+      $('#vivo').textContent = 'Actualizado ' + new Date().toLocaleTimeString('es-CO',{hour:'numeric',minute:'2-digit'});
+    } catch(e) {}
+  }
+  setInterval(revisar, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) revisar(); });
 })();
 </script>
 </body>

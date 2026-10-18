@@ -190,6 +190,13 @@ label.campo small{font-weight:600;color:var(--muted)}
 .info-pago{background:var(--rosa-suave);border-radius:14px;padding:12px 14px;font-size:.92rem;display:flex;gap:10px;align-items:flex-start;justify-content:space-between}
 .info-pago p{margin:0;white-space:pre-line;min-width:0;overflow-wrap:anywhere}
 .info-pago button{flex:none;border:0;background:var(--rosa);color:#fff;border-radius:10px;padding:6px 10px;font-weight:800;font-size:.8rem}
+.aviso-transf{display:flex;gap:10px;align-items:flex-start;background:#fff7d6;border:1px solid #f5e08a;color:#5b4500;border-radius:14px;padding:10px 12px;font-size:.88rem;font-weight:600}
+.comprobante{border:2px dashed var(--rosa);border-radius:14px;padding:12px;display:flex;gap:12px;align-items:center;background:var(--card)}
+.comprobante .subir{position:relative;overflow:hidden;flex:none}
+.comprobante .subir input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.comprobante img{width:56px;height:56px;border-radius:10px;object-fit:cover;flex:none}
+.comprobante span{font-size:.85rem;color:var(--muted);min-width:0}
+.btn-sm{padding:8px 14px;font-size:.88rem}
 .vueltas{font-size:.85rem;color:var(--muted);font-weight:600}
 .resumen{background:var(--rosa-suave);border-radius:16px;padding:14px 16px;font-size:.9rem}
 .resumen div{display:flex;justify-content:space-between;gap:10px}
@@ -358,6 +365,12 @@ label.campo small{font-weight:600;color:var(--muted)}
       <label class="campo full">Notas <small>(opcional)</small><textarea id="fNotas" rows="2" placeholder="Ej: es sorpresa, llamar a la portería, colores preferidos…"></textarea></label>
       <div class="campo full"><span style="font-weight:700;font-size:.9rem">¿Cómo vas a pagar?</span><div class="pagos" id="fPagos"></div>
         <div class="info-pago" id="infoPago" hidden><p id="infoPagoTxt"></p><button type="button" id="copiarPago">Copiar</button></div>
+        <div class="aviso-transf" id="avisoTransf" hidden>⏳ <span>Cuando hagas la transferencia, <b>primero verificamos tu pago</b> y luego empezamos a preparar tu pedido. Te avisamos por WhatsApp.</span></div>
+        <div class="comprobante" id="cajaComprobante" hidden>
+          <img id="compPrev" alt="Comprobante" hidden>
+          <span id="compTxt">📎 ¿Ya pagaste? Sube la foto del comprobante <b>(opcional)</b>. También puedes enviarlo por WhatsApp.</span>
+          <label class="btn btn-borde btn-sm subir" style="margin-left:auto">Subir<input type="file" id="fComp" accept="image/*"></label>
+        </div>
         <label class="campo" id="cajaPagaCon" hidden>¿Con cuánto vas a pagar? <small>para llevarte las vueltas exactas</small>
           <input id="fPagaCon" type="text" inputmode="numeric" placeholder="Ej: 100.000">
           <span class="vueltas" id="vueltas"></span></label>
@@ -380,6 +393,7 @@ label.campo small{font-weight:600;color:var(--muted)}
       <h3>¡Pedido registrado!</h3>
       <p>Para ver cómo va tu pedido, solo necesitas tu número de celular: <code id="numPedido">—</code></p>
       <p class="nota">Si WhatsApp no se abrió solo, toca el botón para enviarnos el pedido. Ahí te confirmamos el domicilio y el pago.</p>
+      <p class="nota" id="notaListo" style="font-weight:700;color:var(--fg)"></p>
       <a class="btn btn-wa" id="linkWaPedido" href="#" target="_blank" rel="noopener">Abrir WhatsApp</a>
       <a class="btn btn-borde" id="linkSeguir" href="#" target="_blank" rel="noopener">Ver el estado de mi pedido</a>
       <button class="btn" style="color:var(--muted)" data-cerrar>Seguir viendo regalos</button>
@@ -560,6 +574,8 @@ label.campo small{font-weight:600;color:var(--muted)}
     $('#infoPago').hidden = !info; $('#infoPagoTxt').textContent = info;
     $('#copiarPago').hidden = DN.esEfectivo(m);
     $('#cajaPagaCon').hidden = !DN.esEfectivo(m);
+    $('#avisoTransf').hidden = !m || DN.esEfectivo(m);
+    $('#cajaComprobante').hidden = !m || DN.esEfectivo(m);
     $('#fPagaCon').required = DN.esEfectivo(m);
     calcVueltas();
   }
@@ -570,6 +586,22 @@ label.campo small{font-weight:600;color:var(--muted)}
       : 'Vueltas aproximadas: ' + pesos(paga - tot) + ' (antes del domicilio)';
   }
   $('#fPagos').addEventListener('change', pintarPago);
+
+  // Comprobante: se reduce en el teléfono antes de enviarlo
+  let compData = '';
+  function reducirImg(file, max=1100, q=.75){
+    return new Promise((ok, mal) => { const r = new FileReader(); r.onerror = mal; r.onload = () => { const img = new Image(); img.onerror = mal; img.onload = () => {
+      const s = Math.min(1, max/Math.max(img.width, img.height)); const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width*s); cv.height = Math.round(img.height*s);
+      const cx = cv.getContext('2d'); cx.fillStyle = '#fff'; cx.fillRect(0,0,cv.width,cv.height); cx.drawImage(img,0,0,cv.width,cv.height);
+      ok(cv.toDataURL('image/jpeg', q)); }; img.src = r.result; }; r.readAsDataURL(file); });
+  }
+  $('#fComp').addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $('#compTxt').textContent = 'Preparando la foto…';
+    try { compData = await reducirImg(f, DN.DEMO ? 700 : 1100, DN.DEMO ? .6 : .75); $('#compPrev').src = compData; $('#compPrev').hidden = false; $('#compTxt').innerHTML = '✅ Comprobante listo. Se enviará con tu pedido.'; }
+    catch(err){ compData = ''; $('#compTxt').textContent = 'No pudimos leer esa imagen. Intenta con otra o envíala por WhatsApp.'; }
+  });
   $('#fPagaCon').addEventListener('input', e => { const n = soloNum(e.target.value); e.target.value = n ? n.toLocaleString('es-CO') : ''; calcVueltas(); });
   $('#copiarPago').addEventListener('click', async () => {
     const t = $('#infoPagoTxt').textContent;
@@ -605,6 +637,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     const pago = medio + (pagaCon ? ' · paga con ' + pesos(pagaCon) : '');
     const tarjeta = $('#fTarjeta').value.trim(), firma = $('#fFirma').value.trim();
     const pedido = {
+      comprobanteData: compData || undefined,
       id, cliente: $('#fNombre').value.trim(), telefono: $('#fTel').value.trim(), recibe: $('#fRecibe').value.trim(),
       direccion: $('#fDir').value.trim(), fechaEntrega: fechaBonita($('#fFecha').value, $('#fFranja').value), notas: $('#fNotas').value.trim(), pago,
       mensaje: [carrito.filter(i=>i.mensaje).map(i => i.nombre + ': ' + i.mensaje).join(' | '), tarjeta].filter(Boolean).join(' | ') + (firma ? ' — De: ' + firma : ''),
@@ -616,6 +649,8 @@ label.campo small{font-weight:600;color:var(--muted)}
     txt += `\n*Total productos:* ${pesos(pedido.total)} _(+ domicilio)_\n\n`;
     txt += `👤 *Cliente:* ${pedido.cliente} · ${pedido.telefono}\n🎀 *Recibe:* ${pedido.recibe}\n📅 *Entrega:* ${pedido.fechaEntrega}\n📍 *Dirección:* ${pedido.direccion}\n💳 *Pago:* ${pago}`;
     if (tarjeta || firma) txt += `\n💌 *Tarjeta:* ${tarjeta ? '"' + tarjeta + '"' : '(sin mensaje)'}${firma ? '\n   ✍️ De parte de: ' + firma : ''}`;
+    if (compData) txt += `\n📎 *Comprobante:* adjunto en el pedido (subido desde la tienda)`;
+    else if (!DN.esEfectivo(medio)) txt += `\n📎 *Comprobante:* te lo envío por aquí`;
     if (pagaCon) txt += `\n💵 *Vueltas:* paga con ${pesos(pagaCon)} (productos ${pesos(pedido.total)} + domicilio)`;
     if (pedido.notas) txt += `\n📝 *Notas:* ${pedido.notas}`;
     txt += `\n\n🔎 Sigue tu pedido con tu celular: ${DN.linkSeguimiento(pedido.telefono)}`;
@@ -629,7 +664,8 @@ label.campo small{font-weight:600;color:var(--muted)}
     $('#linkWaPedido').href = url;
     $('#linkSeguir').href = DN.linkSeguimiento(pedido.telefono);
     carrito = []; guardar(); pintarCarrito();
-    e.target.reset(); catFrase = '';
+    $('#notaListo').textContent = DN.esEfectivo(medio) ? '' : '⏳ Primero verificamos tu pago y luego empezamos a preparar tu pedido.';
+    e.target.reset(); catFrase = ''; compData = ''; $('#compPrev').hidden = true; $('#compTxt').innerHTML = '📎 ¿Ya pagaste? Sube la foto del comprobante <b>(opcional)</b>. También puedes enviarlo por WhatsApp.';
     cerrarTodo(); abrir('#mListo');
   });
 
