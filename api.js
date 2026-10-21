@@ -7,7 +7,7 @@
   const CFG = window.DULCENATA_CONFIG || {};
   const API = (CFG.API_URL || '').trim();
   const DEMO = !API;
-  const LS_KEY = 'dulcenata_demo_v4';
+  const LS_KEY = 'dulcenata_demo_v5';
 
   // ---------- Imagen de ejemplo (SVG) ----------
   function placeholder(emoji, c1, c2) {
@@ -28,9 +28,14 @@
       { id: 'p3', nombre: 'Ancheta dulce', categoria: 'Anchetas', precio: 95000, precioAntes: 0, descripcion: 'Canasta con chocolates, galletas, gomitas, snacks y moño de cinta. Ideal para cumpleaños y aniversarios.', imagen: placeholder('🧺', '#ffe0ec', '#c2185b'), etiqueta: '', estado: 'activo', destacado: false, orden: 3 },
       { id: 'p4', nombre: 'Ancheta para él', categoria: 'Anchetas', precio: 110000, precioAntes: 0, descripcion: 'Cervezas artesanales, maní, papitas, chocolatina y tarjeta. Para papá, novio o amigo.', imagen: placeholder('🎁', '#fde68a', '#d97706'), etiqueta: 'Nuevo', estado: 'activo', destacado: false, orden: 4 },
       { id: 'p5', nombre: 'Caja de fresas con chocolate', categoria: 'Detalles dulces', precio: 55000, precioAntes: 0, descripcion: '12 fresas bañadas en chocolate blanco y negro, decoradas a mano. Se entregan frescas el mismo día.', imagen: placeholder('🍓', '#ffd6e0', '#e11d48'), etiqueta: '', estado: 'activo', destacado: true, orden: 5 },
-      { id: 'p6', nombre: 'Bouquet de 12 rosas', categoria: 'Flores', precio: 90000, precioAntes: 0, descripcion: 'Rosas rojas o rosadas con follaje, papel coreano y tarjeta con tu mensaje.', imagen: placeholder('🌹', '#ffe4ef', '#be185d'), etiqueta: '', estado: 'activo', destacado: false, orden: 6 },
-      { id: 'p7', nombre: 'Globo burbuja personalizado', categoria: 'Globos', precio: 45000, precioAntes: 0, descripcion: 'Globo transparente con nombre o frase en vinilo, plumas o confeti por dentro y base.', imagen: placeholder('🎉', '#fff7c2', '#e8337f'), etiqueta: '', estado: 'activo', destacado: false, orden: 7 },
+      { id: 'p6', nombre: 'Bouquet de 12 rosas', categoria: 'Flores', precio: 90000, precioAntes: 0, descripcion: 'Rosas rojas o rosadas con follaje, papel coreano y tarjeta con tu mensaje.', imagen: placeholder('🌹', '#ffe4ef', '#be185d'), etiqueta: '', estado: 'activo', destacado: false, orden: 6, colorTitulo: 'Color de las rosas', colores: [{ n: 'Rojo', h: '#c8102e' }, { n: 'Rosado', h: '#f48fb1' }, { n: 'Blanco', h: '#ffffff' }] },
+      { id: 'p7', nombre: 'Globo burbuja personalizado', categoria: 'Globos', precio: 45000, precioAntes: 0, descripcion: 'Globo transparente con nombre o frase en vinilo, plumas o confeti por dentro y base.', imagen: placeholder('🎉', '#fff7c2', '#e8337f'), etiqueta: '', estado: 'activo', destacado: false, orden: 7, colorTitulo: 'Color del globo', colores: [{ n: 'Rosado', h: '#f48fb1' }, { n: 'Dorado', h: '#d4af37' }, { n: 'Plateado', h: '#c0c0c0' }, { n: 'Azul', h: '#64b5f6' }] },
       { id: 'p8', nombre: 'Peluche con chocolates', categoria: 'Peluches', precio: 75000, precioAntes: 0, descripcion: 'Osito de peluche de 30 cm, caja de chocolates y globo metalizado.', imagen: placeholder('🧸', '#fde2e4', '#9d174d'), etiqueta: '', estado: 'agotado', destacado: false, orden: 8 }
+    ],
+    resenas: [
+      { id: 'r1', fecha: hace(30), nombre: 'Valentina (ejemplo)', estrellas: 5, texto: 'El desayuno llegó puntual y hermoso, mi mamá lloró de la emoción. ¡Gracias!', producto: 'Desayuno sorpresa clásico', estado: 'aprobada', respuesta: '¡Gracias Valentina! Fue un placer ser parte de ese momento 💖' },
+      { id: 'r2', fecha: hace(80), nombre: 'Julián (ejemplo)', estrellas: 5, texto: 'Excelente atención por WhatsApp y la ancheta muy completa.', producto: 'Ancheta dulce', estado: 'aprobada', respuesta: '' },
+      { id: 'r3', fecha: hace(2), nombre: 'Sara (ejemplo)', estrellas: 4, texto: 'Muy lindo todo, el globo podría ser un poquito más grande.', producto: '', estado: 'pendiente', respuesta: '' }
     ],
     pedidos: [
       { id: 'DN-7QK2', fecha: hace(3), cliente: 'Andrés Ruiz (ejemplo)', telefono: '3109876543', recibe: 'Camila', direccion: 'Calle 10 #40-20, El Poblado', fechaEntrega: 'mañana · 9:00 a. m.', mensaje: 'Feliz aniversario #17', pago: 'Daviplata', notas: 'Es sorpresa', productos: '1 x Desayuno premium con globo ($125.000)', total: 125000, estado: 'Confirmado', fotoEntrega: '', historial: [{ e: 'Pendiente', t: hace(3) }, { e: 'Confirmado', t: hace(2) }] },
@@ -100,10 +105,45 @@
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 
     async tienda() {
-      if (DEMO) demoDb = demoLoad();
-      if (DEMO) return { config: mergeConfig(demoDb.config), productos: demoDb.productos.slice() };
+      if (DEMO) {
+        demoDb = demoLoad();
+        return { config: mergeConfig(demoDb.config), productos: demoDb.productos.slice(),
+                 resenas: (demoDb.resenas || []).filter(r => r.estado === 'aprobada') };
+      }
       const d = await get({ action: 'tienda' });
-      return { config: mergeConfig(d.config), productos: d.productos };
+      return { config: mergeConfig(d.config), productos: d.productos, resenas: d.resenas || [] };
+    },
+
+    // ----- Reseñas -----
+    async crearResena(r) {
+      if (DEMO) {
+        demoDb = demoLoad(); demoDb.resenas = demoDb.resenas || [];
+        demoDb.resenas.unshift(Object.assign({ id: 'r' + Date.now().toString(36), fecha: new Date().toISOString(), estado: 'pendiente', respuesta: '' }, r));
+        demoSave(demoDb); return true;
+      }
+      return post({ action: 'crearResena', resena: r });
+    },
+    async resenaActualizar(pin, id, campos) {
+      if (DEMO) { demoDb = demoLoad(); const r = (demoDb.resenas || []).find(x => x.id === id); if (r) Object.assign(r, campos); demoSave(demoDb); return true; }
+      return post({ action: 'resenaActualizar', pin, id, campos });
+    },
+    async resenaEliminar(pin, id) {
+      if (DEMO) { demoDb = demoLoad(); demoDb.resenas = (demoDb.resenas || []).filter(x => x.id !== id); demoSave(demoDb); return true; }
+      return post({ action: 'resenaEliminar', pin, id });
+    },
+
+    // ----- Colores de un producto: [{n: nombre, h: '#hex'}] -----
+    PALETA: [
+      { n: 'Rojo', h: '#c8102e' }, { n: 'Rosado', h: '#f48fb1' }, { n: 'Fucsia', h: '#d81b70' }, { n: 'Palo de rosa', h: '#d8a7a7' },
+      { n: 'Blanco', h: '#ffffff' }, { n: 'Crema', h: '#f5e6c8' }, { n: 'Amarillo', h: '#ffd60a' }, { n: 'Naranja', h: '#f57c00' },
+      { n: 'Lila', h: '#b39ddb' }, { n: 'Morado', h: '#6a1b9a' }, { n: 'Azul cielo', h: '#64b5f6' }, { n: 'Azul', h: '#1e4fa8' },
+      { n: 'Verde menta', h: '#a5d6a7' }, { n: 'Verde', h: '#2e7d32' }, { n: 'Dorado', h: '#d4af37' }, { n: 'Plateado', h: '#c0c0c0' },
+      { n: 'Negro', h: '#222222' }, { n: 'Café', h: '#6d4c41' }, { n: 'Multicolor', h: 'linear-gradient(135deg,#f48fb1,#ffd60a,#64b5f6,#a5d6a7)' }
+    ],
+    colores(p) {
+      let c = p && p.colores;
+      if (typeof c === 'string') { try { c = JSON.parse(c || '[]'); } catch (e) { c = []; } }
+      return Array.isArray(c) ? c.filter(x => x && x.n) : [];
     },
 
     // Pedidos de un cliente buscados por su número de celular
@@ -155,10 +195,11 @@
     },
     async adminDatos(pin) {
       let d;
-      if (DEMO) { demoDb = demoLoad(); d = { config: demoDb.config, productos: demoDb.productos.slice(), pedidos: demoDb.pedidos.slice() }; }
+      if (DEMO) { demoDb = demoLoad(); d = { config: demoDb.config, productos: demoDb.productos.slice(), pedidos: demoDb.pedidos.slice(), resenas: (demoDb.resenas || []).slice() }; }
       else d = await post({ action: 'adminDatos', pin });
       d.config = mergeConfig(d.config);
       d.pedidos.forEach(p => p.historial = hist(p.historial));
+      d.resenas = d.resenas || [];
       return d;
     },
     async guardarProducto(pin, p) {

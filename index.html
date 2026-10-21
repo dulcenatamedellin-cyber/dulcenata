@@ -108,6 +108,38 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .btn-mas:hover{transform:rotate(90deg)}
 .btn-mas:disabled{background:var(--line);color:var(--muted);cursor:not-allowed;transform:none}
 .btn-mas svg{width:22px;height:22px}
+.puntos{display:flex;gap:4px;align-items:center}
+.punto{width:14px;height:14px;border-radius:50%;border:1px solid rgba(0,0,0,.15);flex:none}
+.puntos small{color:var(--muted);font-size:.72rem;font-weight:700}
+.colores{display:flex;flex-direction:column;gap:8px}
+.colores b{font-size:.92rem}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.sw{display:flex;flex-direction:column;align-items:center;gap:4px;border:0;background:none;padding:2px;font-size:.72rem;font-weight:700;color:var(--muted);width:64px}
+.sw span{width:38px;height:38px;border-radius:50%;border:2px solid var(--line);box-shadow:inset 0 0 0 3px var(--card)}
+.sw.on span{border-color:var(--rosa);box-shadow:inset 0 0 0 3px var(--card),0 0 0 2px var(--rosa)}
+.sw.on{color:var(--fg)}
+.item .color{font-size:.8rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+/* Reseñas */
+.resenas{padding-block:10px 60px}
+.res-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
+.res-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem)}
+.res-head h2 i{color:var(--rosa)}
+.promedio{display:flex;align-items:center;gap:10px;color:var(--muted);font-weight:700}
+.promedio b{font-family:var(--f-display);font-size:2rem;color:var(--fg)}
+.estrellas{color:#f5a623;letter-spacing:2px}
+.res-lista{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.res{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.res .quien{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.res .quien b{font-size:.98rem}
+.res .quien small{color:var(--muted);font-size:.78rem;white-space:nowrap}
+.res p{margin:0;font-size:.94rem;overflow-wrap:anywhere}
+.res .prod{font-size:.75rem;font-weight:800;color:var(--rosa);text-transform:uppercase;letter-spacing:.04em}
+.res .resp{background:var(--rosa-suave);border-radius:12px;padding:8px 10px;font-size:.86rem}
+.res .resp b{color:var(--rosa-hondo)}
+.res-vacio{grid-column:1/-1;text-align:center;color:var(--muted);background:var(--card);border:1px dashed var(--line);border-radius:18px;padding:30px}
+.star-pick{display:flex;gap:4px}
+.star-pick button{border:0;background:none;font-size:2rem;line-height:1;color:var(--line);padding:0 2px}
+.star-pick button.on{color:#f5a623}
 .vacio{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)}
 .esqueleto{aspect-ratio:.72;border-radius:20px;background:linear-gradient(90deg,var(--line),var(--rosa-suave),var(--line));background-size:200% 100%;animation:brillo 1.2s infinite}
 @keyframes brillo{to{background-position:-200% 0}}
@@ -288,6 +320,16 @@ label.campo small{font-weight:600;color:var(--muted)}
   </div>
 </main>
 
+<section class="resenas" id="resenas">
+  <div class="wrap">
+    <div class="res-head">
+      <div><h2>Lo que dicen nuestros <i>clientes</i></h2><div class="promedio" id="promedio"></div></div>
+      <button class="btn btn-rosa" id="btnResena">⭐ Dejar mi reseña</button>
+    </div>
+    <div class="res-lista" id="resLista"></div>
+  </div>
+</section>
+
 <footer>
   <div class="wrap">
     <div>
@@ -387,6 +429,28 @@ label.campo small{font-weight:600;color:var(--muted)}
   </div>
 </div>
 
+<!-- Reseña -->
+<div class="modal" id="mResena" role="dialog" aria-modal="true">
+  <div class="modal-caja" style="width:min(520px,100%)">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <form class="form" id="formResena" style="grid-template-columns:1fr">
+      <h3>Cuéntanos tu experiencia</h3>
+      <div class="campo"><span style="font-weight:700;font-size:.9rem">¿Cuántas estrellas nos das?</span>
+        <div class="star-pick" id="starPick" role="radiogroup" aria-label="Calificación"></div></div>
+      <label class="campo">Tu nombre *<input id="rNombre" required maxlength="40" placeholder="Ej: Laura G."></label>
+      <label class="campo">¿Qué compraste? <small>(opcional)</small><select id="rProducto"><option value="">Prefiero no decir</option></select></label>
+      <label class="campo">Tu comentario *<textarea id="rTexto" required rows="4" maxlength="600" placeholder="¿Cómo te pareció el detalle, la entrega, la atención?"></textarea></label>
+      <p class="nota" style="margin:0">Publicamos las reseñas después de revisarlas.</p>
+      <button class="btn btn-rosa" type="submit" id="btnEnviarRes">Publicar reseña</button>
+    </form>
+    <div class="listo" id="resGracias" hidden>
+      <div class="ok">💖</div><h3>¡Gracias por tu reseña!</h3>
+      <p class="nota">La veremos pronto y la publicaremos en la tienda.</p>
+      <button class="btn btn-borde" data-cerrar>Cerrar</button>
+    </div>
+  </div>
+</div>
+
 <!-- Pedido listo -->
 <div class="modal" id="mListo" role="dialog" aria-modal="true">
   <div class="modal-caja" style="width:min(460px,100%)">
@@ -412,6 +476,7 @@ label.campo small{font-weight:600;color:var(--muted)}
 (function(){
   const $ = s => document.querySelector(s);
   const esc = DN.esc, pesos = DN.pesos;
+  let RESENAS = [], estrellasSel = 5, colorDet = '';
   let CFG = {}, PRODUCTOS = [], cat = 'Todo', q = '', carrito = [];
   const LS = 'dn_carrito_v1';
 
@@ -433,7 +498,9 @@ label.campo small{font-weight:600;color:var(--muted)}
       CFG = d.config;
       PRODUCTOS = d.productos.filter(p => p.estado !== 'oculto')
         .sort((a,b) => (b.destacado - a.destacado) || ((a.orden||0) - (b.orden||0)));
-      pintarMarca(); pintarChips(); pintarGrid(); pintarCarrito();
+      RESENAS = d.resenas || [];
+      pintarMarca(); pintarChips(); pintarGrid(); pintarCarrito(); pintarResenas();
+      if (location.hash === '#resena') abrirResena();
     } catch(e) {
       $('#grid').innerHTML = `<div class="vacio"><p>No pudimos cargar el catálogo. Revisa tu conexión.</p><button class="btn btn-rosa" onclick="location.reload()">Intentar de nuevo</button></div>`;
     }
@@ -490,6 +557,7 @@ label.campo small{font-weight:600;color:var(--muted)}
         <div class="info">
           <span class="cat">${esc(p.categoria)}</span>
           <h3>${esc(p.nombre)}</h3>
+          ${(() => { const C = DN.colores(p); return C.length ? `<div class="puntos" title="${esc(p.colorTitulo||'Colores disponibles')}">${C.slice(0,6).map(c=>`<span class="punto" style="background:${esc(c.h)}"></span>`).join('')}${C.length>6?`<small>+${C.length-6}</small>`:''}</div>` : ''; })()}
           <p class="desc">${esc(p.descripcion)}</p>
           <div class="pie">
             <div class="precio">${oferta ? `<s>${pesos(p.precioAntes)}</s>` : ''}${pesos(p.precio)}</div>
@@ -506,8 +574,11 @@ label.campo small{font-weight:600;color:var(--muted)}
   let cantDet = 1;
   function verDetalle(id){
     const p = PRODUCTOS.find(x => x.id === id); if (!p) return;
-    cantDet = 1;
+    cantDet = 1; colorDet = '';
     const agot = p.estado === 'agotado', oferta = p.precioAntes > p.precio;
+    const C = DN.colores(p);
+    const bloqueColor = C.length && !agot ? `<div class="colores"><b>${esc(p.colorTitulo || 'Elige el color')}: <span id="colorSel" style="color:var(--rosa)"></span></b>
+      <div class="swatches">${C.map(c => `<button type="button" class="sw" data-sw="${esc(c.n)}" aria-label="${esc(c.n)}"><span style="background:${esc(c.h)}"></span>${esc(c.n)}</button>`).join('')}</div></div>` : '';
     $('#detalle').innerHTML = `<div class="detalle">
       <div class="foto-g"><img src="${esc(imgDe(p))}" alt="${esc(p.nombre)}"></div>
       <div class="cuerpo">
@@ -515,6 +586,7 @@ label.campo small{font-weight:600;color:var(--muted)}
         <h3>${esc(p.nombre)}</h3>
         <div class="precio">${oferta?`<s>${pesos(p.precioAntes)}</s>`:''}${pesos(p.precio)}</div>
         <p>${esc(p.descripcion)}</p>
+        ${bloqueColor}
         ${agot ? '<p style="color:var(--rosa);font-weight:800">Agotado por ahora. Escríbenos y te avisamos cuando vuelva.</p>' : `
         <div class="fila-add">
           <div class="stepper"><button type="button" data-dc="-1" aria-label="Menos">−</button><span id="dCant">1</span><button type="button" data-dc="1" aria-label="Más">+</button></div>
@@ -526,12 +598,13 @@ label.campo small{font-weight:600;color:var(--muted)}
   }
 
   // ---------- Carrito ----------
-  function agregar(id, cant=1, msg=''){
+  function agregar(id, cant=1, msg='', color=''){
     const p = PRODUCTOS.find(x => x.id === id); if (!p || p.estado==='agotado') return;
-    const key = id + '|' + msg;
+    const key = id + '|' + msg + '|' + color;
     const it = carrito.find(x => x.key === key);
+    const hex = color ? (DN.colores(p).find(c => c.n === color) || {}).h : '';
     if (it) it.cantidad += cant;
-    else carrito.push({ key, id, nombre:p.nombre, precio:p.precio, imagen:imgDe(p), cantidad:cant, mensaje:msg });
+    else carrito.push({ key, id, nombre:p.nombre, precio:p.precio, imagen:imgDe(p), cantidad:cant, mensaje:msg, color, colorHex: hex, colorTitulo: p.colorTitulo || 'Color' });
     guardar(); pintarCarrito();
     const b = $('#badge'); b.classList.remove('pop'); void b.offsetWidth; b.classList.add('pop');
     toast('✓ Agregado a tu pedido');
@@ -546,6 +619,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     $('#items').innerHTML = carrito.map((i,ix) => `<div class="item">
       <img src="${esc(i.imagen)}" alt="">
       <div style="min-width:0"><b>${esc(i.nombre)}</b>
+        ${i.color ? `<div class="color"><span class="punto" style="background:${esc(i.colorHex||'#ccc')}"></span>${esc(i.colorTitulo||'Color')}: ${esc(i.color)}</div>` : ''}
         ${i.mensaje ? `<div class="msg">Tarjeta: “${esc(i.mensaje)}”</div>` : ''}
         <div class="fila">
           <div class="stepper"><button data-c="${ix}" data-d="-1" aria-label="Menos">−</button><span>${i.cantidad}</span><button data-c="${ix}" data-d="1" aria-label="Más">+</button></div>
@@ -554,6 +628,40 @@ label.campo small{font-weight:600;color:var(--muted)}
         <button class="quitar" data-quitar="${ix}">Quitar</button>
       </div></div>`).join('');
   }
+
+  // ---------- Reseñas ----------
+  const est = n => '★'.repeat(n) + '☆'.repeat(5-n);
+  function pintarResenas(){
+    const R = RESENAS;
+    if (R.length){
+      const prom = R.reduce((s,r)=>s+Number(r.estrellas||5),0) / R.length;
+      $('#promedio').innerHTML = `<b>${prom.toFixed(1).replace('.',',')}</b><span><span class="estrellas">${est(Math.round(prom))}</span><br>${R.length} reseña${R.length>1?'s':''}</span>`;
+    } else $('#promedio').textContent = '';
+    $('#resLista').innerHTML = R.length ? R.map(r => `<article class="res">
+      <div class="estrellas" aria-label="${r.estrellas} estrellas">${est(Number(r.estrellas)||5)}</div>
+      ${r.producto ? `<span class="prod">${esc(r.producto)}</span>` : ''}
+      <p>${esc(r.texto)}</p>
+      <div class="quien"><b>${esc(r.nombre)}</b><small>${r.fecha ? esc(new Date(r.fecha).toLocaleDateString('es-CO',{day:'numeric',month:'short',year:'numeric'})) : ''}</small></div>
+      ${r.respuesta ? `<div class="resp"><b>${esc(CFG.nombre||'Dulcenata')}:</b> ${esc(r.respuesta)}</div>` : ''}
+    </article>`).join('') : `<div class="res-vacio">Todavía no hay reseñas. ¡Sé la primera persona en contarnos cómo te fue! 💖</div>`;
+  }
+  function pintarEstrellas(){ $('#starPick').innerHTML = [1,2,3,4,5].map(n => `<button type="button" class="${n<=estrellasSel?'on':''}" data-star="${n}" role="radio" aria-checked="${n===estrellasSel}" aria-label="${n} estrella${n>1?'s':''}">★</button>`).join(''); }
+  function abrirResena(){
+    estrellasSel = 5; pintarEstrellas();
+    $('#rProducto').innerHTML = '<option value="">Prefiero no decir</option>' + PRODUCTOS.map(p => `<option>${esc(p.nombre)}</option>`).join('');
+    $('#formResena').hidden = false; $('#resGracias').hidden = true;
+    cerrarTodo(); abrir('#mResena');
+  }
+  $('#btnResena').addEventListener('click', abrirResena);
+  $('#formResena').addEventListener('submit', async e => {
+    e.preventDefault();
+    const b = $('#btnEnviarRes'); b.disabled = true; b.textContent = 'Enviando…';
+    try {
+      await DN.crearResena({ nombre: $('#rNombre').value.trim(), estrellas: estrellasSel, texto: $('#rTexto').value.trim(), producto: $('#rProducto').value });
+      e.target.reset(); $('#formResena').hidden = true; $('#resGracias').hidden = false;
+    } catch(err){ toast('No se pudo enviar: ' + err.message); }
+    finally { b.disabled = false; b.textContent = 'Publicar reseña'; }
+  });
 
   // ---------- Tarjeta: frases sugeridas ----------
   let catFrase = '';
@@ -589,7 +697,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   }
   const domicilioActual = () => { const z = zonaElegida(); return z && z.valor != null ? z.valor : 0; };
   function pintarResumen(){
-    const lineas = carrito.map(i => `<div><span>${i.cantidad} × ${esc(i.nombre)}</span><b>${pesos(i.precio*i.cantidad)}</b></div>`).join('');
+    const lineas = carrito.map(i => `<div><span>${i.cantidad} × ${esc(i.nombre)}${i.color ? ' · ' + esc(i.color) : ''}</span><b>${pesos(i.precio*i.cantidad)}</b></div>`).join('');
     const z = zonaElegida(), dom = domicilioActual(), sub = totalCarrito();
     const filaDom = !z ? `<div><span>Domicilio</span><b style="color:var(--muted)">Elige tu zona</b></div>`
       : z.valor == null ? `<div><span>Domicilio (otra zona)</span><b style="color:var(--muted)">Por confirmar</b></div>`
@@ -678,14 +786,15 @@ label.campo small{font-weight:600;color:var(--muted)}
     const pedido = {
       comprobanteData: compData || undefined,
       zona: zona ? zona.nombre : '', domicilio: dom,
+      linkPanel: DN.base() + 'admin.html',
       id, cliente: $('#fNombre').value.trim(), telefono: $('#fTel').value.trim(), recibe: $('#fRecibe').value.trim(),
       direccion: $('#fDir').value.trim(), fechaEntrega: fechaBonita($('#fFecha').value, $('#fFranja').value), notas: $('#fNotas').value.trim(), pago,
       mensaje: [carrito.filter(i=>i.mensaje).map(i => i.nombre + ': ' + i.mensaje).join(' | '), tarjeta].filter(Boolean).join(' | ') + (firma ? ' — De: ' + firma : ''),
-      productos: carrito.map(i => `${i.cantidad} x ${i.nombre} (${pesos(i.precio*i.cantidad)})`).join('\n'),
+      productos: carrito.map(i => `${i.cantidad} x ${i.nombre}${i.color ? ' · ' + i.color : ''} (${pesos(i.precio*i.cantidad)})`).join('\n'),
       total: totalCarrito()
     };
     let txt = `🎁 *Nuevo pedido ${CFG.nombre||'Dulcenata'}* · ${id}\n\n*Productos:*\n`;
-    carrito.forEach(i => { txt += `• ${i.cantidad} × ${i.nombre} — ${pesos(i.precio*i.cantidad)}\n`; if (i.mensaje) txt += `   💌 Tarjeta: "${i.mensaje}"\n`; });
+    carrito.forEach(i => { txt += `• ${i.cantidad} × ${i.nombre} — ${pesos(i.precio*i.cantidad)}\n`; if (i.color) txt += `   🎨 ${i.colorTitulo || 'Color'}: ${i.color}\n`; if (i.mensaje) txt += `   💌 Tarjeta: "${i.mensaje}"\n`; });
     if (zona && zona.valor != null) txt += `\n*Subtotal:* ${pesos(pedido.total)}\n🛵 *Domicilio (${zona.nombre}):* ${zona.valor ? pesos(zona.valor) : 'Gratis'}\n💰 *Total a pagar:* ${pesos(pedido.total + zona.valor)}\n\n`;
     else txt += `\n*Total productos:* ${pesos(pedido.total)} _(+ domicilio${zona ? ', ' + zona.nombre + ': por confirmar' : ''})_\n\n`;
     txt += `👤 *Cliente:* ${pedido.cliente} · ${pedido.telefono}\n🎀 *Recibe:* ${pedido.recibe}\n📅 *Entrega:* ${pedido.fechaEntrega}\n📍 *Dirección:* ${pedido.direccion}${zona ? ' (' + zona.nombre + ')' : ''}\n💳 *Pago:* ${pago}`;
@@ -723,9 +832,15 @@ label.campo small{font-weight:600;color:var(--muted)}
     if (t.dataset.frase !== undefined){ $('#fTarjeta').value = t.dataset.frase; document.querySelectorAll('.frase').forEach(x=>x.classList.toggle('on', x===t)); return; }
     if (t.dataset.cat){ cat = t.dataset.cat; pintarChips(); pintarGrid(); return; }
     if (t.dataset.ver){ verDetalle(t.dataset.ver); return; }
-    if (t.dataset.add){ agregar(t.dataset.add); return; }
+    if (t.dataset.add){ const p = PRODUCTOS.find(x=>x.id===t.dataset.add); if (p && DN.colores(p).length) { verDetalle(p.id); toast('Elige el color'); } else agregar(t.dataset.add); return; }
+    if (t.dataset.sw !== undefined){ colorDet = t.dataset.sw; document.querySelectorAll('.sw').forEach(x=>x.classList.toggle('on', x===t)); $('#colorSel').textContent = colorDet; return; }
+    if (t.dataset.star){ estrellasSel = Number(t.dataset.star); pintarEstrellas(); return; }
     if (t.dataset.dc){ cantDet = Math.max(1, cantDet + Number(t.dataset.dc)); $('#dCant').textContent = cantDet; const p = PRODUCTOS.find(x=>x.id===document.querySelector('[data-addet]').dataset.addet); $('#dSub').textContent = pesos(p.precio*cantDet); return; }
-    if (t.dataset.addet){ agregar(t.dataset.addet, cantDet, ($('#dMsg')||{}).value ? $('#dMsg').value.trim() : ''); cerrarTodo(); return; }
+    if (t.dataset.addet){
+      const p = PRODUCTOS.find(x=>x.id===t.dataset.addet);
+      if (p && DN.colores(p).length && !colorDet) { toast('Elige un color primero'); document.querySelector('.swatches').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300}); return; }
+      agregar(t.dataset.addet, cantDet, '', colorDet); cerrarTodo(); return;
+    }
     if (t.dataset.c !== undefined){ const i = carrito[t.dataset.c]; i.cantidad += Number(t.dataset.d); if (i.cantidad<1) carrito.splice(t.dataset.c,1); guardar(); pintarCarrito(); return; }
     if (t.dataset.quitar !== undefined){ carrito.splice(t.dataset.quitar,1); guardar(); pintarCarrito(); return; }
     if (t.hasAttribute('data-cerrar')){ cerrarTodo(); return; }

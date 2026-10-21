@@ -173,6 +173,36 @@ label.c small{color:var(--muted);font-weight:600}
 .banner-prev{width:100%;max-width:520px;aspect-ratio:2/1;object-fit:cover;border-radius:14px;border:1px solid var(--line);background:var(--rosa-suave)}
 .vars{font-size:.82rem;color:var(--muted);background:var(--bg);border-radius:10px;padding:8px 10px;margin:0 0 12px}
 .vars code{background:var(--rosa-suave);color:var(--rosa-hondo);padding:1px 6px;border-radius:6px;font-weight:700}
+/* Colores del producto */
+.cbox{border:2px dashed var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:10px}
+.paleta{display:flex;flex-wrap:wrap;gap:8px}
+.pc{display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;width:60px;font-size:.68rem;font-weight:700;color:var(--muted);padding:2px}
+.pc span{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);box-shadow:inset 0 0 0 3px var(--card);position:relative}
+.pc.on span{border-color:var(--rosa);box-shadow:inset 0 0 0 3px var(--card),0 0 0 2px var(--rosa)}
+.pc.on span::after{content:"✓";position:absolute;inset:0;display:grid;place-items:center;color:#fff;font-size:.9rem;font-weight:900;text-shadow:0 0 3px rgba(0,0,0,.6)}
+.pc.on{color:var(--fg)}
+.c-propio{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.c-propio input[type=color]{width:44px;height:38px;border:0;padding:0;background:none}
+.c-propio input[type=text]{flex:1;min-width:120px;padding:9px 11px;border-radius:10px;border:2px solid var(--line);background:var(--bg)}
+.punto{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid rgba(0,0,0,.15);vertical-align:middle}
+/* Medios de pago */
+.pago-f{display:grid;grid-template-columns:200px minmax(0,1fr) auto;gap:8px;align-items:start;background:var(--bg);border-radius:12px;padding:8px}
+.pago-f input,.pago-f textarea{padding:9px 11px;border-radius:10px;border:2px solid var(--line);background:var(--card);width:100%;min-width:0}
+.pago-f button{border:0;background:var(--bad-bg);color:var(--bad);border-radius:10px;width:36px;height:36px;font-weight:800}
+/* Pestañas de pedidos y reseñas */
+.seg{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;flex-wrap:wrap}
+.seg button{border:0;background:none;border-radius:9px;padding:8px 12px;font-weight:800;color:var(--muted)}
+.seg button.on{background:var(--rosa);color:#fff}
+.seg button .c{opacity:.8;font-size:.8em;margin-left:4px}
+.filtro-chip{display:inline-flex;align-items:center;gap:6px;background:var(--warn-bg);color:var(--warn);border:0;border-radius:999px;padding:6px 12px;font-weight:800;font-size:.85rem}
+.cifra.link b{color:var(--fg)}
+.res-a{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;border-left:5px solid var(--warn)}
+.res-a[data-e="aprobada"]{border-left-color:var(--ok)}
+.res-a[data-e="oculta"]{border-left-color:var(--line);opacity:.75}
+.res-a .estrellas{color:#f5a623;letter-spacing:2px}
+.res-a p{margin:0}
+.res-a textarea{width:100%;padding:8px 10px;border-radius:10px;border:2px solid var(--line);background:var(--bg);resize:vertical}
+.res-a .acc{display:flex;gap:6px;flex-wrap:wrap}
 /* Zonas */
 .zonas{display:flex;flex-direction:column;gap:6px}
 .zona{display:grid;grid-template-columns:minmax(0,1fr) 130px auto;gap:6px;align-items:center}
@@ -217,6 +247,8 @@ table.t tr:last-child td{border-bottom:0}
 .msg small{color:var(--rosa);font-weight:800;font-size:.72rem;letter-spacing:.05em;text-transform:uppercase}
 .msg textarea{width:100%;padding:8px 10px;border-radius:10px;border:2px solid var(--rosa);background:var(--bg);outline:none;resize:vertical}
 @media (max-width:760px){
+  .pago-f{grid-template-columns:1fr auto}
+  .pago-f textarea{grid-column:1/-1;grid-row:2}
   .v-grid{grid-template-columns:1fr 1fr}
   .v-cols{grid-template-columns:1fr}
   .msg-form{grid-template-columns:1fr}
@@ -270,14 +302,15 @@ table.t tr:last-child td{border-bottom:0}
     <button class="tab" data-tab="ventas">Ventas</button>
     <button class="tab" data-tab="categorias">Categorías</button>
     <button class="tab" data-tab="mensajes">Mensajes tarjeta</button>
+    <button class="tab" data-tab="resenas">Reseñas <span class="n" id="nRes" hidden>0</span></button>
     <button class="tab" data-tab="ajustes">Ajustes y enlaces</button>
   </div></nav>
 
   <main class="wrap">
     <div class="cifras">
-      <div class="cifra"><span>Productos visibles</span><b id="kAct">0</b></div>
-      <div class="cifra"><span>Agotados</span><b id="kAgo">0</b></div>
-      <div class="cifra"><span>Pedidos pendientes</span><b id="kPen">0</b></div>
+      <div class="cifra link" data-ir="activos" role="button" tabindex="0" title="Ver productos visibles"><span>Productos visibles</span><b id="kAct">0</b></div>
+      <div class="cifra link" data-ir="agotados" role="button" tabindex="0" title="Ver productos agotados"><span>Agotados</span><b id="kAgo">0</b></div>
+      <div class="cifra link" data-ir="pendientes" role="button" tabindex="0" title="Ver pedidos pendientes"><span>Pedidos pendientes</span><b id="kPen">0</b></div>
       <div class="cifra link" id="cifraVentas" role="button" tabindex="0" title="Ver detalle de ventas"><span>Ventas del mes</span><b id="kVen">$0</b></div>
     </div>
 
@@ -286,6 +319,7 @@ table.t tr:last-child td{border-bottom:0}
       <div class="herr">
         <input id="qProd" type="search" placeholder="Buscar producto…" aria-label="Buscar producto">
         <select id="fCat" aria-label="Filtrar categoría"><option value="">Todas las categorías</option></select>
+        <select id="fEst" aria-label="Filtrar estado"><option value="">Todos los estados</option><option value="activo">Visibles</option><option value="agotado">Agotados</option><option value="oculto">Ocultos</option></select>
         <button class="btn btn-rosa" id="nuevo">+ Nuevo producto</button>
       </div>
       <div class="lista" id="listaProd"></div>
@@ -336,12 +370,29 @@ table.t tr:last-child td{border-bottom:0}
       <div class="lista" id="listaMsg"></div>
     </section>
 
+    <!-- RESEÑAS -->
+    <section id="tResenas" hidden>
+      <div class="herr">
+        <div class="seg" id="segRes">
+          <button data-vres="pendiente" class="on">Por revisar<span class="c" id="cResP"></span></button>
+          <button data-vres="aprobada">Publicadas<span class="c" id="cResA"></span></button>
+          <button data-vres="oculta">Ocultas<span class="c" id="cResO"></span></button>
+        </div>
+      </div>
+      <p class="ayuda">Las reseñas nuevas no se ven en la tienda hasta que las publicas. Puedes responderlas y tu respuesta sale debajo.</p>
+      <div class="pedidos" id="listaRes"></div>
+    </section>
+
     <!-- PEDIDOS -->
     <section id="tPedidos" hidden>
       <div class="herr">
-        <select id="fEstado" aria-label="Filtrar estado">
-          <option value="">Todos los pedidos</option><option>Pendiente</option><option>Confirmado</option><option>En preparación</option><option>En camino</option><option>Entregado</option><option>Cancelado</option>
-        </select>
+        <div class="seg" id="segPed">
+          <button data-vista="curso" class="on">📦 En curso<span class="c" id="cCurso"></span></button>
+          <button data-vista="entregados">✅ Entregados<span class="c" id="cEnt"></span></button>
+          <button data-vista="cancelados">Cancelados<span class="c" id="cCan"></span></button>
+          <button data-vista="todos">Todos</button>
+        </div>
+        <button class="filtro-chip" id="chipPend" hidden>Solo pendientes ✕</button>
         <button class="btn btn-borde" id="recargar">Actualizar</button>
         <span class="vivo" id="vivo">Se actualiza solo</span>
       </div>
@@ -358,7 +409,7 @@ table.t tr:last-child td{border-bottom:0}
           <label class="c">WhatsApp de pedidos <small>con 57 adelante, sin espacios. Ej: 573001234567</small><input id="aWhatsapp" inputmode="numeric"></label>
           <label class="c">Instagram <small>solo el usuario, sin @</small><input id="aInstagram"></label>
           <label class="c">Ciudad / zona de entregas<input id="aCiudad"></label>
-          <label class="c">Medios de pago <small>separados por coma</small><input id="aPagos"></label>
+          <input type="hidden" id="aPagos">
           <label class="c full">Horario<input id="aHorario"></label>
           <label class="c">Correo de la tienda <small>(sale en el recibo)</small><input id="aCorreo" type="email"></label>
           <label class="c">NIT o cédula <small>(opcional, sale en el recibo)</small><input id="aNit"></label>
@@ -371,9 +422,14 @@ table.t tr:last-child td{border-bottom:0}
         <div id="zonasBox" class="zonas"></div>
         <button type="button" class="btn btn-borde btn-sm" id="addZona" style="margin-top:8px">+ Agregar zona</button>
 
-        <h3 class="seccion">Datos para pagar</h3>
-        <p class="ayuda">Lo que ve el cliente al elegir cada medio de pago: número de cuenta, a nombre de quién, etc. Se crea un campo por cada medio que escribas arriba en "Medios de pago".</p>
-        <div class="grid2" id="pagosInfoBox"></div>
+        <h3 class="seccion">Medios de pago</h3>
+        <p class="ayuda">Agrega, cambia o quita los medios de pago. En "Datos" escribe lo que verá el cliente: número de cuenta, a nombre de quién, llave Bre-B, etc. Si se llama "Efectivo", se le pregunta con cuánto paga.</p>
+        <div id="pagosInfoBox" style="display:flex;flex-direction:column;gap:8px"></div>
+        <button type="button" class="btn btn-borde btn-sm" id="addPago" style="margin-top:8px">+ Agregar medio de pago</button>
+
+        <h3 class="seccion">Avisos por correo</h3>
+        <label class="check"><input type="checkbox" id="aAvisoCorreo"> 📧 Enviarme un correo cuando llegue un pedido o una reseña nueva</label>
+        <p class="ayuda" style="margin-top:6px">Llega al "Correo de la tienda" de arriba. La primera vez hay que dar permiso en Google: en Apps Script ejecuta la función <b>probarCorreo</b>.</p>
 
         <h3 class="seccion">Mensajes para el cliente</h3>
         <p class="ayuda">Se envían por WhatsApp desde cada pedido con el botón verde. Puedes cambiarlos a tu gusto.</p>
@@ -447,6 +503,13 @@ table.t tr:last-child td{border-bottom:0}
         </label>
         <label class="c">Orden <small>(menor sale primero)</small><input id="pOrden" type="number" step="1" placeholder="1"></label>
         <label class="check full"><input type="checkbox" id="pDestacado"> Destacar al inicio del catálogo</label>
+        <label class="check full"><input type="checkbox" id="pTieneColor"> 🎨 Este producto tiene colores para elegir</label>
+        <div class="cbox full" id="cajaColores" hidden>
+          <label class="c">¿Qué tiene color? <small>(así lo verá el cliente)</small><input id="pColorTitulo" placeholder="Ej: Color de las rosas, Color del globo, Color del moño"></label>
+          <b style="font-size:.88rem">Toca los colores que tienes disponibles:</b>
+          <div class="paleta" id="paleta"></div>
+          <div class="c-propio"><span style="font-size:.85rem;font-weight:700;color:var(--muted)">¿Otro color?</span><input type="color" id="cpHex" value="#e91e63" aria-label="Color"><input type="text" id="cpNom" placeholder="Nombre, ej: Vinotinto" maxlength="20"><button type="button" class="btn btn-borde btn-sm" id="cpAdd">+ Agregar</button></div>
+        </div>
       </div>
     </div>
     <div class="modal-pie">
@@ -500,7 +563,7 @@ table.t tr:last-child td{border-bottom:0}
     DATA = await DN.adminDatos(PIN);
     pintarTodo();
   }
-  function pintarTodo(){ titulo(); pintarVentas(); pintarCifras(); pintarCats(); pintarListaCats(); pintarMensajes(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
+  function pintarTodo(){ pintarResenasAdm(); titulo(); pintarVentas(); pintarCifras(); pintarCats(); pintarListaCats(); pintarMensajes(); pintarProductos(); pintarPedidos(); pintarAjustes(); }
 
   // ---------- Cifras ----------
   function pintarCifras(){
@@ -599,15 +662,15 @@ table.t tr:last-child td{border-bottom:0}
 
   // ---------- Productos ----------
   function pintarProductos(){
-    const t = $('#qProd').value.trim().toLowerCase(), c = $('#fCat').value;
-    const lista = DATA.productos.filter(p => (!c || p.categoria===c) && (!t || (p.nombre+' '+p.categoria).toLowerCase().includes(t)))
+    const t = $('#qProd').value.trim().toLowerCase(), c = $('#fCat').value, fe = $('#fEst').value;
+    const lista = DATA.productos.filter(p => (!c || p.categoria===c) && (!fe || p.estado===fe) && (!t || (p.nombre+' '+p.categoria).toLowerCase().includes(t)))
       .sort((a,b)=>(a.orden||0)-(b.orden||0));
     if (!lista.length){ $('#listaProd').innerHTML = `<div class="vacio">No hay productos todavía. Toca <b>+ Nuevo producto</b> para crear el primero.</div>`; return; }
     const nomEstado = { activo:'Visible', agotado:'Agotado', oculto:'Oculto' };
     $('#listaProd').innerHTML = lista.map(p => `<div class="fila">
       <img src="${esc(p.imagen || DN.placeholder('🎁','#ffe0ec','#d81b70'))}" alt="" loading="lazy">
       <div class="t"><b>${esc(p.nombre)}</b><small>${esc(p.categoria)}</small><br>
-        <span class="pill ${esc(p.estado)}">${nomEstado[p.estado]||p.estado}</span> ${p.destacado?'<span class="pill estrella">Destacado</span>':''} ${p.etiqueta?`<span class="pill oculto">${esc(p.etiqueta)}</span>`:''}</div>
+        <span class="pill ${esc(p.estado)}">${nomEstado[p.estado]||p.estado}</span> ${p.destacado?'<span class="pill estrella">Destacado</span>':''} ${DN.colores(p).length ? `<span class="pill oculto">${DN.colores(p).map(c=>`<span class="punto" style="background:${esc(c.h)}"></span>`).join(' ')}</span>` : ''} ${p.etiqueta?`<span class="pill oculto">${esc(p.etiqueta)}</span>`:''}</div>
       <div class="p">${p.precioAntes>p.precio?`<small style="text-decoration:line-through;color:var(--muted);display:block">${pesos(p.precioAntes)}</small>`:''}${pesos(p.precio)}</div>
       <div class="acc">${confirmando===p.id
         ? `<span class="confirma">¿Eliminar? <button class="btn btn-peligro btn-sm" data-borrar="${esc(p.id)}">Sí, eliminar</button><button class="btn btn-borde btn-sm" data-nob>No</button></span>`
@@ -619,6 +682,24 @@ table.t tr:last-child td{border-bottom:0}
     </div>`).join('');
   }
 
+  // Colores del producto
+  let coloresSel = [];
+  function pintarPaleta(){
+    const extra = coloresSel.filter(c => !DN.PALETA.some(x => x.n === c.n));
+    $('#paleta').innerHTML = DN.PALETA.concat(extra).map(c => `<button type="button" class="pc ${coloresSel.some(x=>x.n===c.n)?'on':''}" data-pc="${esc(c.n)}" data-h="${esc(c.h)}"><span style="background:${esc(c.h)}"></span>${esc(c.n)}</button>`).join('');
+  }
+  $('#pTieneColor').addEventListener('change', e => { $('#cajaColores').hidden = !e.target.checked; if (e.target.checked) pintarPaleta(); });
+  $('#paleta').addEventListener('click', e => {
+    const b = e.target.closest('[data-pc]'); if (!b) return;
+    const n = b.dataset.pc, i = coloresSel.findIndex(x => x.n === n);
+    if (i >= 0) coloresSel.splice(i,1); else coloresSel.push({ n, h: b.dataset.h });
+    b.classList.toggle('on', i < 0);
+  });
+  $('#cpAdd').addEventListener('click', () => {
+    const n = $('#cpNom').value.trim(); if (!n) { toast('Escribe el nombre del color'); return; }
+    if (!coloresSel.some(x => x.n.toLowerCase() === n.toLowerCase())) coloresSel.push({ n, h: $('#cpHex').value });
+    $('#cpNom').value = ''; pintarPaleta();
+  });
   function abrirProducto(p){
     editId = p ? p.id : null;
     $('#tituloProd').textContent = p ? 'Editar producto' : 'Nuevo producto';
@@ -631,6 +712,10 @@ table.t tr:last-child td{border-bottom:0}
     $('#pEstado').value = p ? (p.estado||'activo') : 'activo';
     $('#pOrden').value = p ? (p.orden||'') : (DATA.productos.length + 1);
     $('#pDestacado').checked = p ? !!p.destacado : false;
+    coloresSel = p ? DN.colores(p).map(c => ({ n: c.n, h: c.h })) : [];
+    $('#pTieneColor').checked = coloresSel.length > 0; $('#cajaColores').hidden = !coloresSel.length;
+    $('#pColorTitulo').value = p ? (p.colorTitulo || '') : '';
+    pintarPaleta();
     const img = p ? (p.imagen||'') : '';
     fotoData = img.startsWith('data:') ? img : '';
     $('#pImagen').value = fotoData ? '' : img;
@@ -682,9 +767,11 @@ table.t tr:last-child td{border-bottom:0}
       id: editId || '', nombre: $('#pNombre').value.trim(), categoria: $('#pCategoria').value === '__nueva' ? $('#pCatNueva').value.trim() : $('#pCategoria').value,
       precio: Number($('#pPrecio').value)||0, precioAntes: Number($('#pPrecioAntes').value)||0,
       descripcion: $('#pDescripcion').value.trim(), imagen: $('#pImagen').value.trim() || fotoData, etiqueta: $('#pEtiqueta').value.trim(),
-      estado: $('#pEstado').value, destacado: $('#pDestacado').checked, orden: Number($('#pOrden').value)||0
+      estado: $('#pEstado').value, destacado: $('#pDestacado').checked, orden: Number($('#pOrden').value)||0,
+      colores: $('#pTieneColor').checked ? JSON.stringify(coloresSel) : '', colorTitulo: $('#pTieneColor').checked ? ($('#pColorTitulo').value.trim() || 'Color') : ''
     };
     if (!p.categoria) { toast('Elige o crea una categoría'); return; }
+    if ($('#pTieneColor').checked && !coloresSel.length) { toast('Marca al menos un color disponible'); return; }
     const btn = $('#btnGuardarProd'); ocupado(btn, true, 'Guardando…');
     try {
       const cats = CATS();
@@ -767,6 +854,8 @@ table.t tr:last-child td{border-bottom:0}
       const antes = new Set(DATA.pedidos.map(p=>p.id));
       const nuevos = d.pedidos.filter(p => !antes.has(p.id));
       const entregados = d.pedidos.filter(p => { const a = DATA.pedidos.find(x=>x.id===p.id); return a && a.estado !== 'Entregado' && p.estado === 'Entregado'; });
+      const resAntes = new Set((DATA.resenas||[]).map(r=>r.id)), resNuevas = (d.resenas||[]).filter(r => !resAntes.has(r.id));
+      if (resNuevas.length) { DATA.resenas = d.resenas; pintarResenasAdm(); toast('⭐ Nueva reseña de ' + resNuevas[0].nombre); }
       if (firmaPed(d.pedidos) !== firmaPed(DATA.pedidos)) {
         DATA.pedidos = d.pedidos;
         nuevosIds = new Set(nuevos.map(p=>p.id).concat(entregados.map(p=>p.id)));
@@ -791,6 +880,49 @@ table.t tr:last-child td{border-bottom:0}
   }
   setInterval(refrescar, 25000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refrescar(); });
+
+  // ---------- Reseñas ----------
+  let vistaRes = 'pendiente';
+  const estrellas = n => '★'.repeat(n) + '☆'.repeat(5-n);
+  function pintarResenasAdm(){
+    const L = DATA.resenas || [];
+    const cuenta = e => L.filter(r => (r.estado||'pendiente') === e).length;
+    $('#cResP').textContent = cuenta('pendiente'); $('#cResA').textContent = cuenta('aprobada'); $('#cResO').textContent = cuenta('oculta');
+    $('#nRes').textContent = cuenta('pendiente'); $('#nRes').hidden = !cuenta('pendiente');
+    document.querySelectorAll('#segRes [data-vres]').forEach(b => b.classList.toggle('on', b.dataset.vres === vistaRes));
+    const lista = L.filter(r => (r.estado||'pendiente') === vistaRes);
+    if (!lista.length){ $('#listaRes').innerHTML = `<div class="vacio" style="grid-column:1/-1">${vistaRes==='pendiente' ? 'No hay reseñas nuevas por revisar.' : 'Nada por aquí.'}</div>`; return; }
+    $('#listaRes').innerHTML = lista.map(r => `<article class="res-a" data-e="${esc(r.estado||'pendiente')}">
+      <div style="display:flex;justify-content:space-between;gap:8px"><b>${esc(r.nombre)}</b><small style="color:var(--muted)">${r.fecha ? esc(new Date(r.fecha).toLocaleDateString('es-CO',{day:'numeric',month:'short'})) : ''}</small></div>
+      <div class="estrellas">${estrellas(Number(r.estrellas)||5)}</div>
+      ${r.producto ? `<small style="color:var(--rosa);font-weight:800">${esc(r.producto)}</small>` : ''}
+      <p>${esc(r.texto)}</p>
+      <textarea rows="2" data-resp="${esc(r.id)}" placeholder="Tu respuesta (opcional), ej: ¡Gracias por elegirnos! 💖">${esc(r.respuesta||'')}</textarea>
+      <div class="acc">
+        ${r.estado !== 'aprobada' ? `<button class="btn btn-rosa btn-sm" data-resok="${esc(r.id)}">✓ Publicar</button>` : `<button class="btn btn-borde btn-sm" data-resoc="${esc(r.id)}">Ocultar</button>`}
+        <button class="btn btn-borde btn-sm" data-resresp="${esc(r.id)}">Guardar respuesta</button>
+        ${r.estado === 'pendiente' ? `<button class="btn btn-borde btn-sm" data-resoc="${esc(r.id)}">Ocultar</button>` : ''}
+        <button class="btn btn-borde btn-sm" data-resdel="${esc(r.id)}" style="color:var(--bad)">Eliminar</button>
+      </div></article>`).join('');
+  }
+  $('#segRes').addEventListener('click', e => { const b = e.target.closest('[data-vres]'); if (b) { vistaRes = b.dataset.vres; pintarResenasAdm(); } });
+  async function accionResena(d){
+    const id = d.resok || d.resoc || d.resresp || d.resdel; if (!id) return false;
+    const r = (DATA.resenas||[]).find(x => x.id === id); if (!r) return true;
+    const resp = (document.querySelector(`[data-resp="${CSS.escape(id)}"]`)||{}).value;
+    try {
+      if (d.resdel) { await DN.resenaEliminar(PIN, id); DATA.resenas = DATA.resenas.filter(x => x.id !== id); toast('Reseña eliminada'); }
+      else {
+        const campos = { respuesta: (resp||'').trim() };
+        if (d.resok) campos.estado = 'aprobada';
+        if (d.resoc) campos.estado = 'oculta';
+        await DN.resenaActualizar(PIN, id, campos); Object.assign(r, campos);
+        toast(d.resok ? 'Reseña publicada en la tienda' : d.resoc ? 'Reseña oculta' : 'Respuesta guardada');
+      }
+      pintarResenasAdm();
+    } catch(e){ toast('No se guardó'); }
+    return true;
+  }
 
   // ---------- Mensajes de tarjeta ----------
   let filtroMsg = '', editMsg = -1, borrarMsg = -1;
@@ -905,9 +1037,14 @@ table.t tr:last-child td{border-bottom:0}
   }
 
   function pintarPedidos(){
-    const f = $('#fEstado').value;
-    const lista = DATA.pedidos.filter(p => !f || p.estado===f);
-    if (!lista.length){ $('#listaPed').innerHTML = `<div class="vacio" style="grid-column:1/-1">Aquí aparecerán los pedidos que hagan tus clientes desde la tienda.</div>`; return; }
+    const D = DATA.pedidos;
+    const enCurso = p => ['Entregado','Cancelado'].indexOf(p.estado) < 0;
+    $('#cCurso').textContent = D.filter(enCurso).length; $('#cEnt').textContent = D.filter(p=>p.estado==='Entregado').length; $('#cCan').textContent = D.filter(p=>p.estado==='Cancelado').length;
+    document.querySelectorAll('#segPed [data-vista]').forEach(b => b.classList.toggle('on', b.dataset.vista === vistaPed));
+    $('#chipPend').hidden = !soloPend;
+    let lista = D.filter(p => vistaPed==='todos' || (vistaPed==='curso' && enCurso(p)) || (vistaPed==='entregados' && p.estado==='Entregado') || (vistaPed==='cancelados' && p.estado==='Cancelado'));
+    if (soloPend) lista = lista.filter(p => p.estado === 'Pendiente');
+    if (!lista.length){ $('#listaPed').innerHTML = `<div class="vacio" style="grid-column:1/-1">${vistaPed==='entregados' ? 'Aquí quedan los pedidos entregados.' : vistaPed==='cancelados' ? 'No hay pedidos cancelados.' : soloPend ? 'No hay pedidos pendientes por confirmar. 🎉' : 'Aquí aparecerán los pedidos que hagan tus clientes desde la tienda.'}</div>`; return; }
     $('#listaPed').innerHTML = lista.map(p => {
       const fecha = p.fecha ? new Date(p.fecha).toLocaleString('es-CO',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}) : '';
       return `<article class="ped ${nuevosIds.has(p.id)?'nuevo':''}" data-e="${esc(p.estado)}" data-id="${esc(p.id)}">
@@ -939,7 +1076,16 @@ table.t tr:last-child td{border-bottom:0}
     catch(err){ p.estado = prev; pintarPedidos(); pintarCifras(); toast('No se guardó el estado'); }
   }
 
-  $('#fEstado').addEventListener('change', pintarPedidos);
+  let vistaPed = 'curso', soloPend = false;
+  $('#segPed').addEventListener('click', e => { const b = e.target.closest('[data-vista]'); if (!b) return; vistaPed = b.dataset.vista; soloPend = false; pintarPedidos(); });
+  $('#chipPend').addEventListener('click', () => { soloPend = false; pintarPedidos(); });
+  function irA(que){
+    if (que === 'pendientes') { document.querySelector('[data-tab="pedidos"]').click(); vistaPed = 'curso'; soloPend = true; pintarPedidos(); }
+    else { document.querySelector('[data-tab="productos"]').click(); $('#fEst').value = que === 'agotados' ? 'agotado' : 'activo'; $('#fCat').value = ''; $('#qProd').value = ''; pintarProductos(); }
+    window.scrollTo({ top: document.querySelector('.tabs').offsetTop, behavior: 'smooth' });
+  }
+  document.querySelectorAll('[data-ir]').forEach(el => { el.addEventListener('click', () => irA(el.dataset.ir)); el.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') { e.preventDefault(); irA(el.dataset.ir); } }); });
+  $('#fEst').addEventListener('change', pintarProductos);
   $('#recargar').addEventListener('click', async e => { const b=e.currentTarget; ocupado(b,true,'Actualizando…'); try{ await cargar(); toast('Pedidos actualizados'); } catch(err){ toast('Sin conexión'); } ocupado(b,false,'Actualizar'); });
 
   document.addEventListener('change', async e => {
@@ -1024,14 +1170,14 @@ table.t tr:last-child td{border-bottom:0}
   // ---------- Ajustes ----------
   const CAMPOS = ['nombre','eslogan','whatsapp','instagram','ciudad','pagos','horario','domicilio','correo','nit','direccionTienda','msgConfirmado','msgPreparacion','msgCamino','msgEntregado','msgCancelado'];
   const idCampo = k => '#a' + k[0].toUpperCase() + k.slice(1);
+  function filaPago(m, datos){ return `<div class="pago-f"><input data-pn placeholder="Nombre, ej: Nequi" value="${esc(m||'')}" aria-label="Medio de pago"><button type="button" data-qpago aria-label="Quitar">✕</button><textarea data-pd rows="2" placeholder="Datos que verá el cliente, ej: Nequi 300 123 4567 a nombre de María López">${esc(datos||'')}</textarea></div>`; }
   function pintarPagosInfo(){
     const info = DN.pagosInfo(DATA.config);
-    const actuales = {}; document.querySelectorAll('[data-pinfo]').forEach(el => actuales[el.dataset.pinfo] = el.value);
-    const medios = $('#aPagos').value.split(',').map(x=>x.trim()).filter(Boolean);
-    $('#pagosInfoBox').innerHTML = medios.map(m => `<label class="c">${esc(m)}<textarea rows="2" data-pinfo="${esc(m)}" placeholder="${DN.esEfectivo(m) ? 'Ej: Pagas al recibir. Dinos con cuánto pagas para llevar las vueltas.' : 'Ej: Nequi 300 123 4567 a nombre de …'}">${esc(actuales[m] ?? info[m] ?? '')}</textarea></label>`).join('')
-      || '<p class="ayuda">Escribe primero los medios de pago arriba.</p>';
+    const medios = String(DATA.config.pagos||'').split(',').map(x=>x.trim()).filter(Boolean);
+    $('#pagosInfoBox').innerHTML = medios.map(m => filaPago(m, info[m])).join('') || '<p class="ayuda" style="margin:0">Sin medios de pago. Agrega al menos uno.</p>';
   }
-  $('#aPagos').addEventListener('input', pintarPagosInfo);
+  $('#addPago').addEventListener('click', () => { const p = $('#pagosInfoBox p'); if (p) p.remove(); $('#pagosInfoBox').insertAdjacentHTML('beforeend', filaPago('', '')); $('#pagosInfoBox .pago-f:last-child input').focus(); });
+  $('#pagosInfoBox').addEventListener('click', e => { if (e.target.closest('[data-qpago]')) e.target.closest('.pago-f').remove(); });
   function filaZona(z){ return `<div class="zona"><input data-zn placeholder="Zona o barrio" value="${esc(z.nombre||'')}" aria-label="Zona"><input data-zv inputmode="numeric" placeholder="$ valor" value="${z.valor ? Number(z.valor).toLocaleString('es-CO') : ''}" aria-label="Valor del domicilio"><button type="button" data-qzona aria-label="Quitar zona">✕</button></div>`; }
   function pintarZonasAj(){ const Z = DN.zonas(DATA.config); $('#zonasBox').innerHTML = Z.map(filaZona).join('') || '<p class="ayuda" style="margin:0">Sin zonas: el cliente no verá valor de domicilio al pedir.</p>'; }
   $('#addZona').addEventListener('click', () => { const p = $('#zonasBox p'); if (p) p.remove(); $('#zonasBox').insertAdjacentHTML('beforeend', filaZona({})); $('#zonasBox .zona:last-child input').focus(); });
@@ -1041,8 +1187,8 @@ table.t tr:last-child td{border-bottom:0}
     const c = DATA.config;
     pintarZonasAj();
     CAMPOS.forEach(k => { $(idCampo(k)).value = c[k] || ''; });
-    document.querySelectorAll('[data-pinfo]').forEach(el => el.remove());
     pintarPagosInfo();
+    $('#aAvisoCorreo').checked = String(c.avisoCorreo) !== 'no';
     $('#bannerPrev').src = c.banner || 'banner.jpg';
     const link = DN.base(), nom = c.nombre || 'Dulcenata';
     $('#linkTienda').value = link;
@@ -1053,8 +1199,12 @@ table.t tr:last-child td{border-bottom:0}
     e.preventDefault();
     const cfg = {}; CAMPOS.forEach(k => cfg[k] = $(idCampo(k)).value.trim());
     cfg.whatsapp = cfg.whatsapp.replace(/\D/g,''); cfg.instagram = cfg.instagram.replace('@','');
-    const pinfo = {}; document.querySelectorAll('[data-pinfo]').forEach(el => pinfo[el.dataset.pinfo] = el.value.trim());
+    const pinfo = {}, medios = [];
+    document.querySelectorAll('#pagosInfoBox .pago-f').forEach(r => { const n = r.querySelector('[data-pn]').value.trim().replace(/,/g,' '); if (n) { medios.push(n); pinfo[n] = r.querySelector('[data-pd]').value.trim(); } });
+    if (!medios.length) { toast('Agrega al menos un medio de pago'); return; }
+    cfg.pagos = medios.join(', ');
     cfg.pagosInfo = JSON.stringify(pinfo);
+    cfg.avisoCorreo = $('#aAvisoCorreo').checked ? 'si' : 'no';
     cfg.zonas = JSON.stringify([...document.querySelectorAll('#zonasBox .zona')].map(r => ({ nombre: r.querySelector('[data-zn]').value.trim(), valor: Number(r.querySelector('[data-zv]').value.replace(/\D/g,'')) || 0 })).filter(z => z.nombre));
     const btn = $('#btnAjustes'); ocupado(btn, true, 'Guardando…');
     try { await DN.guardarConfig(PIN, cfg); DATA.config = Object.assign({}, DATA.config, cfg); pintarAjustes(); toast('Ajustes guardados'); }
@@ -1084,7 +1234,7 @@ table.t tr:last-child td{border-bottom:0}
     const d = t.dataset;
     if (d.tab){
       document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on', x===t));
-      ['productos','pedidos','ventas','categorias','mensajes','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
+      ['productos','pedidos','ventas','categorias','mensajes','resenas','ajustes'].forEach(n => $('#t'+n[0].toUpperCase()+n.slice(1)).hidden = n!==d.tab);
       return;
     }
     if (d.avanzar){ cambiarEstadoPedido(d.avanzar, d.a, false); return; } // el enlace abre WhatsApp con el aviso
@@ -1094,6 +1244,7 @@ table.t tr:last-child td{border-bottom:0}
     if (d.anular){ anularLink(d.anular); return; }
     if (await accionCategoria(d)) return;
     if (await accionMensaje(d)) return;
+    if (await accionResena(d)) return;
     if (d.rango){ rango(d.rango); return; }
     if (t.id==='nuevo') return abrirProducto(null);
     if (d.editar) return abrirProducto(DATA.productos.find(x=>x.id===d.editar));

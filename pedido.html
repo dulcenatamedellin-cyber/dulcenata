@@ -100,6 +100,7 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
       <div class="card otros" id="otros" hidden></div>
       <button class="aviso-son" id="btnAviso" type="button">🔔 Avisarme con sonido cuando cambie</button>
       <p class="vivo" id="vivo">Esta página se actualiza sola</p>
+      <a class="btn sec" id="lnkResena" href="index.html#resena" hidden>⭐ Cuéntanos cómo te fue (dejar reseña)</a>
       <a class="btn sec" id="lnkRecibo" href="#" target="_blank" rel="noopener" hidden>🧾 Ver mi recibo de compra</a>
       <a class="btn" id="wa" href="#" target="_blank" rel="noopener">Escribir a Dulcenata por WhatsApp</a>
       <a class="btn sec" href="index.html">Ver más regalos</a>
@@ -167,6 +168,7 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
       <span><b>${esc(String(o.productos||'').split('\n')[0])}</b><br><small>${esc(corto(o.fecha))}</small></span><span class="pill">${esc(o.estado)}</span></button>`).join('');
     const conRecibo = p.estado !== 'Pendiente' && p.estado !== 'Cancelado';
     $('#lnkRecibo').hidden = !conRecibo;
+    $('#lnkResena').hidden = p.estado !== 'Entregado';
     if (conRecibo) $('#lnkRecibo').href = DN.base() + 'recibo.html#' + tel + '-' + p.id;
     $('#wa').href = 'https://wa.me/' + String(c.whatsapp||'').replace(/\D/g,'') + '?text=' + encodeURIComponent('Hola, quiero preguntar por mi pedido (' + p.id + ', celular ' + bonito(tel) + ')');
     document.title = 'Mi pedido · ' + p.estado;
