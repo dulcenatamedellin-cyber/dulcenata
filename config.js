@@ -23,7 +23,11 @@ window.DULCENATA_CONFIG = {
   correo: 'dulcenatamedellin@gmail.com',
   direccionTienda: 'Medellín, Antioquia',
   nit: '',                  // NIT o cédula (opcional, sale en el recibo)
-  categorias: '["Desayunos sorpresa","Anchetas","Detalles dulces","Globos","Flores","Peluches"]',
+  categorias: '["Desayunos sorpresa","Anchetas","Detalles dulces","Globos","Flores","Peluches","Adiciones"]',
+
+  // Foto impresa en la tarjeta (se cambia en el panel > Ajustes)
+  fotoTarjetaActiva: 'si',
+  fotoTarjetaPrecio: 5000,
 
   // Zonas de domicilio con su valor (se editan en el panel > Ajustes). Valores de ejemplo.
   zonas: [

@@ -140,6 +140,28 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .star-pick{display:flex;gap:4px}
 .star-pick button{border:0;background:none;font-size:2rem;line-height:1;color:var(--line);padding:0 2px}
 .star-pick button.on{color:#f5a623}
+.chip.adic{border-color:var(--sol);background:#fff8d6;color:#7a5b00}
+.chip.adic.on{background:var(--sol);border-color:var(--sol);color:#2b1420}
+.tira-adic{grid-column:1/-1;display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#fff8d6,var(--rosa-suave));border:2px dashed var(--sol);border-radius:18px;padding:14px 16px;flex-wrap:wrap}
+.tira-adic .ico{font-size:2rem}
+.tira-adic div{flex:1;min-width:180px}
+.tira-adic b{display:block;font-size:1.02rem}
+.tira-adic span{color:var(--muted);font-size:.9rem}
+.adic-lista{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 10px;scrollbar-width:thin}
+.adic-item{flex:none;width:150px;background:var(--bg);border:1px solid var(--line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column}
+.adic-item img{width:100%;aspect-ratio:1;object-fit:cover}
+.adic-item div{padding:8px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
+.adic-item b{font-size:.85rem;line-height:1.2}
+.adic-item .pr{font-weight:800;color:var(--rosa);font-size:.9rem}
+.adic-item button{margin-top:auto;border:0;border-radius:10px;background:var(--rosa);color:#fff;font-weight:800;padding:7px;font-size:.82rem}
+.adic-item button.ok{background:var(--ok);}
+.foto-tarj{background:#fff8d6;border:1px solid #f5e08a;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.foto-tarj .check{display:flex;gap:10px;align-items:flex-start;font-weight:700;cursor:pointer}
+.foto-tarj .check input{width:20px;height:20px;accent-color:var(--rosa);flex:none;margin-top:2px}
+.foto-tarj .opc{display:flex;gap:8px;flex-wrap:wrap}
+.foto-tarj .opc label{display:flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.85rem;cursor:pointer}
+.foto-tarj .opc label:has(input:checked){border-color:var(--rosa);background:var(--rosa-suave)}
+.foto-tarj img{width:80px;height:80px;border-radius:10px;object-fit:cover}
 .vacio{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)}
 .esqueleto{aspect-ratio:.72;border-radius:20px;background:linear-gradient(90deg,var(--line),var(--rosa-suave),var(--line));background-size:200% 100%;animation:brillo 1.2s infinite}
 @keyframes brillo{to{background-position:-200% 0}}
@@ -406,6 +428,20 @@ label.campo small{font-weight:600;color:var(--muted)}
         <div class="frases" id="frases"></div>
         <label class="campo">Tu mensaje<textarea id="fTarjeta" rows="3" maxlength="300" placeholder="Escribe aquí lo que quieres que diga la tarjeta…"></textarea></label>
         <label class="campo">¿De parte de quién? <small>(como quieres que firme la tarjeta)</small><input id="fFirma" maxlength="60" placeholder="Ej: Con amor, Juan"></label>
+        <div class="foto-tarj" id="cajaFotoTarj" hidden>
+          <label class="check"><input type="checkbox" id="fFotoTarj"><span>📷 ¿Quieres una <b>foto impresa en la tarjeta</b>? <span style="color:var(--rosa)" id="precioFotoTarj"></span></span></label>
+          <div id="opcFotoTarj" hidden style="display:flex;flex-direction:column;gap:8px">
+            <div class="opc">
+              <label><input type="radio" name="modoFoto" value="subir" checked> Subirla ahora</label>
+              <label><input type="radio" name="modoFoto" value="wa"> La envío por WhatsApp</label>
+            </div>
+            <div id="subirFotoTarj" style="display:flex;gap:10px;align-items:center">
+              <img id="fotoTarjPrev" alt="Foto para la tarjeta" hidden>
+              <label class="btn btn-borde btn-sm" style="position:relative;overflow:hidden">Elegir foto<input type="file" id="fFotoTarjArch" accept="image/*" style="position:absolute;inset:0;opacity:0;cursor:pointer"></label>
+              <small id="fotoTarjTxt" style="color:var(--muted)">Usa una foto clara; la imprimimos en la tarjeta.</small>
+            </div>
+          </div>
+        </div>
       </div>
       <label class="campo full">Notas <small>(opcional)</small><textarea id="fNotas" rows="2" placeholder="Ej: es sorpresa, llamar a la portería, colores preferidos…"></textarea></label>
       <div class="campo full"><span style="font-weight:700;font-size:.9rem">¿Cómo vas a pagar?</span><div class="pagos" id="fPagos"></div>
@@ -426,6 +462,23 @@ label.campo small{font-weight:600;color:var(--muted)}
         Enviar pedido por WhatsApp
       </button>
     </form>
+  </div>
+</div>
+
+<!-- Sugerencia de adiciones antes de pagar -->
+<div class="modal" id="mAdic" role="dialog" aria-modal="true">
+  <div class="modal-caja" style="width:min(620px,100%)">
+    <button class="x" data-cerrar aria-label="Cerrar">✕</button>
+    <div style="padding:24px 20px 20px;display:flex;flex-direction:column;gap:12px">
+      <h3 style="font-size:1.5rem">¿Le agregamos algo más? 🎈</h3>
+      <p style="margin:0;color:var(--muted)">Haz tu detalle todavía más especial con nuestras adiciones:</p>
+      <div class="adic-lista" id="adicLista"></div>
+      <p id="adicFoto" class="nota" style="margin:0" hidden></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-borde" id="adicVer" style="flex:1">Ver todas las adiciones</button>
+        <button class="btn btn-rosa" id="adicSeguir" style="flex:1">No, gracias. Continuar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -530,13 +583,14 @@ label.campo small{font-weight:600;color:var(--muted)}
     PRODUCTOS.forEach(p => cats[p.categoria] = (cats[p.categoria]||0) + 1);
     // Orden definido en el panel; solo se muestran categorías que tengan productos
     const orden = DN.categorias(CFG, PRODUCTOS).filter(c => cats[c]);
-    const lista = [['Todo', PRODUCTOS.length], ...orden.map(c => [c, cats[c]])];
-    $('#chips').innerHTML = lista.map(([c,n]) => `<button class="chip ${c===cat?'on':''}" data-cat="${esc(c)}" role="tab">${esc(c)}<span class="c">${n}</span></button>`).join('');
+    const normales = orden.filter(c => !DN.esAdicionCat(c)), adic = orden.filter(c => DN.esAdicionCat(c));
+    const lista = [['Todo', PRODUCTOS.filter(p => !DN.esAdicion(p)).length], ...normales.map(c => [c, cats[c]]), ...adic.map(c => [c, cats[c]])];
+    $('#chips').innerHTML = lista.map(([c,n]) => `<button class="chip ${c===cat?'on':''} ${DN.esAdicionCat(c)?'adic':''}" data-cat="${esc(c)}" role="tab">${DN.esAdicionCat(c)?'➕ ':''}${esc(c)}<span class="c">${n}</span></button>`).join('');
   }
 
   function filtrados(){
     const t = q.trim().toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
-    return PRODUCTOS.filter(p => (cat==='Todo' || p.categoria===cat) &&
+    return PRODUCTOS.filter(p => ((cat==='Todo' && (!DN.esAdicion(p) || t)) || p.categoria===cat) &&
       (!t || (p.nombre+' '+p.descripcion+' '+p.categoria).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(t)));
   }
 
@@ -545,6 +599,8 @@ label.campo small{font-weight:600;color:var(--muted)}
   function pintarGrid(){
     const lista = filtrados();
     if (!lista.length){ $('#grid').innerHTML = `<div class="vacio"><p style="font-size:2.4rem;margin:0">🔍</p><p>No encontramos regalos con esa búsqueda.</p></div>`; return; }
+    const adics = PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado');
+    const tira = cat === 'Todo' && !q.trim() && adics.length ? `<div class="tira-adic"><span class="ico">🎈</span><div><b>Complementa tu detalle</b><span>${esc(adics.slice(0,4).map(p=>p.nombre.toLowerCase()).join(', '))}${adics.length>4?' y más':''}</span></div><button class="btn btn-rosa btn-sm" data-veradic>Ver adiciones</button></div>` : '';
     $('#grid').innerHTML = lista.map(p => {
       const agot = p.estado === 'agotado';
       const oferta = p.precioAntes > p.precio;
@@ -567,7 +623,7 @@ label.campo small{font-weight:600;color:var(--muted)}
           </div>
         </div>
       </article>`;
-    }).join('');
+    }).join('') + tira;
   }
 
   // ---------- Detalle ----------
@@ -698,11 +754,12 @@ label.campo small{font-weight:600;color:var(--muted)}
   const domicilioActual = () => { const z = zonaElegida(); return z && z.valor != null ? z.valor : 0; };
   function pintarResumen(){
     const lineas = carrito.map(i => `<div><span>${i.cantidad} × ${esc(i.nombre)}${i.color ? ' · ' + esc(i.color) : ''}</span><b>${pesos(i.precio*i.cantidad)}</b></div>`).join('');
-    const z = zonaElegida(), dom = domicilioActual(), sub = totalCarrito();
+    const z = zonaElegida(), dom = domicilioActual(), sub = subtotalPedido();
+    const filaFoto = extraFoto() ? `<div><span>📷 Foto impresa en la tarjeta</span><b>${pesos(extraFoto())}</b></div>` : '';
     const filaDom = !z ? `<div><span>Domicilio</span><b style="color:var(--muted)">Elige tu zona</b></div>`
       : z.valor == null ? `<div><span>Domicilio (otra zona)</span><b style="color:var(--muted)">Por confirmar</b></div>`
       : `<div><span>Domicilio · ${esc(z.nombre)}</span><b>${z.valor ? pesos(z.valor) : 'Gratis'}</b></div>`;
-    $('#resumen').innerHTML = lineas + `<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Subtotal productos</span><b>${pesos(sub)}</b></div>` + filaDom +
+    $('#resumen').innerHTML = lineas + filaFoto + `<div style="border-top:1px solid var(--line);margin-top:6px;padding-top:6px"><span>Subtotal productos</span><b>${pesos(sub)}</b></div>` + filaDom +
       `<div style="font-size:1.1rem;margin-top:4px"><span><b>Total a pagar</b></span><b style="color:var(--rosa)">${pesos(sub + dom)}${z && z.valor == null ? ' + domicilio' : ''}</b></div>` +
       (DN.zonas(CFG).length ? '' : `<div class="nota">${esc(CFG.domicilio||'')}</div>`);
     $('#zonaTxt').textContent = z && z.valor == null ? 'Te escribimos por WhatsApp con el valor del domicilio para tu zona.' : '';
@@ -724,7 +781,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     calcVueltas();
   }
   function calcVueltas(){
-    const paga = soloNum($('#fPagaCon').value), tot = totalCarrito() + domicilioActual();
+    const paga = soloNum($('#fPagaCon').value), tot = subtotalPedido() + domicilioActual();
     if (!paga) { $('#vueltas').textContent = ''; return; }
     const conDom = zonaElegida() && zonaElegida().valor != null;
     $('#vueltas').textContent = paga < tot ? 'Ese valor es menor que el total a pagar (' + pesos(tot) + ').'
@@ -754,10 +811,55 @@ label.campo small{font-weight:600;color:var(--muted)}
     catch(e){ const r = document.createRange(); r.selectNodeContents($('#infoPagoTxt')); const s = getSelection(); s.removeAllRanges(); s.addRange(r); toast('Mantén presionado para copiar'); }
   });
 
+  // ---------- Foto en la tarjeta ----------
+  let fotoTarjData = '';
+  const precioFoto = () => Number(String(CFG.fotoTarjetaPrecio||0).replace(/\D/g,'')) || 0;
+  const fotoActiva = () => String(CFG.fotoTarjetaActiva||'si') !== 'no';
+  const extraFoto = () => (fotoActiva() && $('#fFotoTarj').checked) ? precioFoto() : 0;
+  const subtotalPedido = () => totalCarrito() + extraFoto();
+  function pintarFotoTarj(){
+    $('#cajaFotoTarj').hidden = !fotoActiva();
+    $('#precioFotoTarj').textContent = precioFoto() ? '+' + pesos(precioFoto()) : '(sin costo)';
+    $('#opcFotoTarj').hidden = !$('#fFotoTarj').checked;
+    const modo = (document.querySelector('input[name=modoFoto]:checked')||{}).value;
+    $('#subirFotoTarj').hidden = modo !== 'subir';
+  }
+  $('#fFotoTarj').addEventListener('change', () => { pintarFotoTarj(); pintarResumen(); });
+  document.querySelectorAll('input[name=modoFoto]').forEach(r => r.addEventListener('change', pintarFotoTarj));
+  $('#fFotoTarjArch').addEventListener('change', async e => {
+    const f = e.target.files[0]; if (!f) return;
+    $('#fotoTarjTxt').textContent = 'Preparando la foto…';
+    try { fotoTarjData = await reducirImg(f, DN.DEMO ? 700 : 1600, DN.DEMO ? .65 : .88); $('#fotoTarjPrev').src = fotoTarjData; $('#fotoTarjPrev').hidden = false; $('#fotoTarjTxt').textContent = '✅ Foto lista'; }
+    catch(err){ fotoTarjData = ''; $('#fotoTarjTxt').textContent = 'No pudimos leer esa imagen. Prueba con otra.'; }
+  });
+
+  // ---------- Sugerencia de adiciones antes de pagar ----------
+  let adicMostrada = false;
+  function intentarPagar(){
+    if (!carrito.length) return;
+    const adics = PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado');
+    const yaTiene = carrito.some(i => { const p = PRODUCTOS.find(x=>x.id===i.id); return p && DN.esAdicion(p); });
+    if (!adics.length || yaTiene || adicMostrada) { abrirDatos(); return; }
+    adicMostrada = true;
+    $('#adicLista').innerHTML = adics.map(p => `<div class="adic-item"><img src="${esc(imgDe(p))}" alt=""><div><b>${esc(p.nombre)}</b><span class="pr">${pesos(p.precio)}</span>
+      <button type="button" data-adic="${esc(p.id)}">${DN.colores(p).length ? 'Elegir color' : '+ Agregar'}</button></div></div>`).join('');
+    $('#adicFoto').hidden = !(fotoActiva());
+    $('#adicFoto').textContent = '📷 ¿Sabías que también podemos imprimir una foto en la tarjeta' + (precioFoto() ? ' por solo ' + pesos(precioFoto()) : '') + '? Lo eliges en el siguiente paso.';
+    $('#adicSeguir').textContent = 'No, gracias. Continuar';
+    cerrarTodo(); abrir('#mAdic');
+  }
+  $('#adicSeguir').addEventListener('click', () => abrirDatos());
+  $('#adicVer').addEventListener('click', verAdiciones);
+  function verAdiciones(){
+    const c = DN.categorias(CFG, PRODUCTOS).find(x => DN.esAdicionCat(x)) || 'Adiciones';
+    cat = c; q = ''; $('#q').value = ''; pintarChips(); pintarGrid(); cerrarTodo();
+    document.getElementById('catalogo').scrollIntoView({ behavior: 'smooth' });
+  }
+
   // ---------- Pedido ----------
   function abrirDatos(){
     if (!carrito.length) return;
-    pintarZonas(); pintarResumen();
+    pintarZonas(); pintarFotoTarj(); pintarResumen();
     const hoy = new Date(); hoy.setMinutes(hoy.getMinutes() - hoy.getTimezoneOffset());
     $('#fFecha').min = hoy.toISOString().slice(0,10);   // desde hoy; la hora se cuadra por WhatsApp
     pintarFrases(); pintarPago();
@@ -780,21 +882,27 @@ label.campo small{font-weight:600;color:var(--muted)}
     const zona = zonaElegida();
     if (!$('#cajaZona').hidden && !zona) { toast('Elige la zona de entrega'); $('#fZona').focus(); return; }
     const dom = zona && zona.valor != null ? zona.valor : '';
-    if (DN.esEfectivo(medio) && pagaCon && pagaCon < totalCarrito() + (Number(dom)||0)) { toast('Revisa con cuánto vas a pagar'); $('#fPagaCon').focus(); return; }
+    if (DN.esEfectivo(medio) && pagaCon && pagaCon < subtotalPedido() + (Number(dom)||0)) { toast('Revisa con cuánto vas a pagar'); $('#fPagaCon').focus(); return; }
     const pago = medio + (pagaCon ? ' · paga con ' + pesos(pagaCon) : '');
     const tarjeta = $('#fTarjeta').value.trim(), firma = $('#fFirma').value.trim();
+    const conFoto = extraFoto() > 0 || (fotoActiva() && $('#fFotoTarj').checked);
+    const modoFoto = (document.querySelector('input[name=modoFoto]:checked')||{}).value;
+    if (conFoto && modoFoto === 'subir' && !fotoTarjData) { toast('Sube la foto para la tarjeta o elige "La envío por WhatsApp"'); $('#fFotoTarjArch').closest('label').focus(); return; }
+    const lineaFoto = conFoto ? `\n1 x Foto impresa en la tarjeta (${pesos(precioFoto())})` : '';
     const pedido = {
       comprobanteData: compData || undefined,
+      fotoTarjetaData: conFoto && modoFoto === 'subir' ? fotoTarjData : undefined,
       zona: zona ? zona.nombre : '', domicilio: dom,
       linkPanel: DN.base() + 'admin.html',
       id, cliente: $('#fNombre').value.trim(), telefono: $('#fTel').value.trim(), recibe: $('#fRecibe').value.trim(),
       direccion: $('#fDir').value.trim(), fechaEntrega: fechaBonita($('#fFecha').value, $('#fFranja').value), notas: $('#fNotas').value.trim(), pago,
       mensaje: [carrito.filter(i=>i.mensaje).map(i => i.nombre + ': ' + i.mensaje).join(' | '), tarjeta].filter(Boolean).join(' | ') + (firma ? ' — De: ' + firma : ''),
-      productos: carrito.map(i => `${i.cantidad} x ${i.nombre}${i.color ? ' · ' + i.color : ''} (${pesos(i.precio*i.cantidad)})`).join('\n'),
-      total: totalCarrito()
+      productos: carrito.map(i => `${i.cantidad} x ${i.nombre}${i.color ? ' · ' + i.color : ''} (${pesos(i.precio*i.cantidad)})`).join('\n') + lineaFoto,
+      total: subtotalPedido()
     };
     let txt = `🎁 *Nuevo pedido ${CFG.nombre||'Dulcenata'}* · ${id}\n\n*Productos:*\n`;
     carrito.forEach(i => { txt += `• ${i.cantidad} × ${i.nombre} — ${pesos(i.precio*i.cantidad)}\n`; if (i.color) txt += `   🎨 ${i.colorTitulo || 'Color'}: ${i.color}\n`; if (i.mensaje) txt += `   💌 Tarjeta: "${i.mensaje}"\n`; });
+    if (conFoto) txt += `• 📷 Foto impresa en la tarjeta — ${pesos(precioFoto())}\n   ${modoFoto === 'subir' ? '(foto subida con el pedido)' : '(te envío la foto por aquí)'}\n`;
     if (zona && zona.valor != null) txt += `\n*Subtotal:* ${pesos(pedido.total)}\n🛵 *Domicilio (${zona.nombre}):* ${zona.valor ? pesos(zona.valor) : 'Gratis'}\n💰 *Total a pagar:* ${pesos(pedido.total + zona.valor)}\n\n`;
     else txt += `\n*Total productos:* ${pesos(pedido.total)} _(+ domicilio${zona ? ', ' + zona.nombre + ': por confirmar' : ''})_\n\n`;
     txt += `👤 *Cliente:* ${pedido.cliente} · ${pedido.telefono}\n🎀 *Recibe:* ${pedido.recibe}\n📅 *Entrega:* ${pedido.fechaEntrega}\n📍 *Dirección:* ${pedido.direccion}${zona ? ' (' + zona.nombre + ')' : ''}\n💳 *Pago:* ${pago}`;
@@ -815,6 +923,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     $('#linkSeguir').href = DN.linkSeguimiento(pedido.telefono);
     carrito = []; guardar(); pintarCarrito();
     $('#notaListo').textContent = DN.esEfectivo(medio) ? '' : '⏳ Primero verificamos tu pago y luego empezamos a preparar tu pedido.';
+    fotoTarjData = ''; $('#fotoTarjPrev').hidden = true; $('#fotoTarjTxt').textContent = 'Usa una foto clara; la imprimimos en la tarjeta.'; adicMostrada = false;
     e.target.reset(); catFrase = ''; compData = ''; $('#compPrev').hidden = true; $('#compTxt').innerHTML = '📎 ¿Ya pagaste? Sube la foto del comprobante <b>(opcional)</b>. También puedes enviarlo por WhatsApp.';
     cerrarTodo(); abrir('#mListo');
   });
@@ -825,6 +934,12 @@ label.campo small{font-weight:600;color:var(--muted)}
 
   document.addEventListener('click', e => {
     const t = e.target.closest('button,a,[data-cerrar]'); if (!t) { if (e.target.classList.contains('modal')) cerrarTodo(); return; }
+    if (t.dataset.veradic !== undefined){ verAdiciones(); return; }
+    if (t.dataset.adic){
+      const p = PRODUCTOS.find(x=>x.id===t.dataset.adic); if (!p) return;
+      if (DN.colores(p).length) { verDetalle(p.id); return; }
+      agregar(p.id); t.textContent = '✓ Agregado'; t.classList.add('ok'); $('#adicSeguir').textContent = 'Continuar con mi pedido'; return;
+    }
     if (t.dataset.catfrase){
       if (t.dataset.catfrase === '__propio'){ $('#fTarjeta').value=''; $('#fTarjeta').focus(); document.querySelectorAll('.frase.on').forEach(x=>x.classList.remove('on')); return; }
       catFrase = t.dataset.catfrase; pintarFrases(); return;
@@ -848,7 +963,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   $('#velo').addEventListener('click', cerrarTodo);
   document.addEventListener('keydown', e => { if (e.key==='Escape') cerrarTodo(); });
   $('#abrirCarrito').addEventListener('click', () => abrir('#cajon'));
-  $('#irPagar').addEventListener('click', abrirDatos);
+  $('#irPagar').addEventListener('click', intentarPagar);
   $('#q').addEventListener('input', e => { q = e.target.value; pintarGrid(); });
 
   iniciar();

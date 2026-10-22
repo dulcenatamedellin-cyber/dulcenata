@@ -7,7 +7,7 @@
   const CFG = window.DULCENATA_CONFIG || {};
   const API = (CFG.API_URL || '').trim();
   const DEMO = !API;
-  const LS_KEY = 'dulcenata_demo_v5';
+  const LS_KEY = 'dulcenata_demo_v6';
 
   // ---------- Imagen de ejemplo (SVG) ----------
   function placeholder(emoji, c1, c2) {
@@ -30,6 +30,10 @@
       { id: 'p5', nombre: 'Caja de fresas con chocolate', categoria: 'Detalles dulces', precio: 55000, precioAntes: 0, descripcion: '12 fresas bañadas en chocolate blanco y negro, decoradas a mano. Se entregan frescas el mismo día.', imagen: placeholder('🍓', '#ffd6e0', '#e11d48'), etiqueta: '', estado: 'activo', destacado: true, orden: 5 },
       { id: 'p6', nombre: 'Bouquet de 12 rosas', categoria: 'Flores', precio: 90000, precioAntes: 0, descripcion: 'Rosas rojas o rosadas con follaje, papel coreano y tarjeta con tu mensaje.', imagen: placeholder('🌹', '#ffe4ef', '#be185d'), etiqueta: '', estado: 'activo', destacado: false, orden: 6, colorTitulo: 'Color de las rosas', colores: [{ n: 'Rojo', h: '#c8102e' }, { n: 'Rosado', h: '#f48fb1' }, { n: 'Blanco', h: '#ffffff' }] },
       { id: 'p7', nombre: 'Globo burbuja personalizado', categoria: 'Globos', precio: 45000, precioAntes: 0, descripcion: 'Globo transparente con nombre o frase en vinilo, plumas o confeti por dentro y base.', imagen: placeholder('🎉', '#fff7c2', '#e8337f'), etiqueta: '', estado: 'activo', destacado: false, orden: 7, colorTitulo: 'Color del globo', colores: [{ n: 'Rosado', h: '#f48fb1' }, { n: 'Dorado', h: '#d4af37' }, { n: 'Plateado', h: '#c0c0c0' }, { n: 'Azul', h: '#64b5f6' }] },
+      { id: 'a1', nombre: 'Globo metalizado de corazón', categoria: 'Adiciones', precio: 12000, precioAntes: 0, descripcion: 'Globo de 45 cm inflado con helio, con cinta.', imagen: placeholder('❤️', '#ffe0ec', '#e11d48'), etiqueta: '', estado: 'activo', destacado: false, orden: 20, colorTitulo: 'Color del globo', colores: [{ n: 'Rojo', h: '#c8102e' }, { n: 'Rosado', h: '#f48fb1' }, { n: 'Dorado', h: '#d4af37' }, { n: 'Plateado', h: '#c0c0c0' }] },
+      { id: 'a2', nombre: 'Vaso personalizado', categoria: 'Adiciones', precio: 18000, precioAntes: 0, descripcion: 'Vaso con nombre o frase en vinilo.', imagen: placeholder('🥤', '#e0f2fe', '#0284c7'), etiqueta: '', estado: 'activo', destacado: false, orden: 21 },
+      { id: 'a3', nombre: 'Mini vino espumoso', categoria: 'Adiciones', precio: 35000, precioAntes: 0, descripcion: 'Botella de 375 ml para brindar.', imagen: placeholder('🍾', '#fef3c7', '#b45309'), etiqueta: '', estado: 'activo', destacado: false, orden: 22 },
+      { id: 'a4', nombre: 'Rosa adicional', categoria: 'Adiciones', precio: 6000, precioAntes: 0, descripcion: 'Una rosa natural con papel y moño.', imagen: placeholder('🌹', '#ffe4ef', '#be185d'), etiqueta: '', estado: 'activo', destacado: false, orden: 23, colorTitulo: 'Color de la rosa', colores: [{ n: 'Rojo', h: '#c8102e' }, { n: 'Rosado', h: '#f48fb1' }, { n: 'Blanco', h: '#ffffff' }, { n: 'Amarillo', h: '#ffd60a' }] },
       { id: 'p8', nombre: 'Peluche con chocolates', categoria: 'Peluches', precio: 75000, precioAntes: 0, descripcion: 'Osito de peluche de 30 cm, caja de chocolates y globo metalizado.', imagen: placeholder('🧸', '#fde2e4', '#9d174d'), etiqueta: '', estado: 'agotado', destacado: false, orden: 8 }
     ],
     resenas: [
@@ -83,6 +87,7 @@
       let base = [];
       try { base = JSON.parse(config.categorias || '[]'); } catch (e) {}
       (productos || []).forEach(p => { if (p.categoria && base.indexOf(p.categoria) < 0) base.push(p.categoria); });
+      if (!base.some(c => DN.esAdicionCat(c))) base.push('Adiciones');   // siempre existe la categoría de adiciones
       return base;
     },
 
@@ -102,6 +107,8 @@
       if (typeof z === 'string') { try { z = JSON.parse(z); } catch (e) { z = []; } }
       return Array.isArray(z) ? z.filter(x => x && x.nombre).map(x => ({ nombre: String(x.nombre), valor: Number(x.valor) || 0 })) : [];
     },
+    esAdicionCat(c) { return /^adici[oó]n(es)?$/i.test(String(c || '').trim()); },
+    esAdicion(p) { return DN.esAdicionCat(p && p.categoria); },
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 
     async tienda() {
@@ -168,7 +175,7 @@
         const t = new Date().toISOString();
         demoDb = demoLoad();
         const p = Object.assign({ fecha: t, fotoEntrega: '', domicilio: '' }, pedido, { id, estado: 'Pendiente', historial: [{ e: 'Pendiente', t }] });
-        p.comprobante = p.comprobanteData || ''; delete p.comprobanteData;
+        p.comprobante = p.comprobanteData || ''; delete p.comprobanteData; p.fotoTarjeta = p.fotoTarjetaData || ''; delete p.fotoTarjetaData;
         demoDb.pedidos.unshift(p);
         demoSave(demoDb);
         return { id };

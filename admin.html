@@ -422,6 +422,10 @@ table.t tr:last-child td{border-bottom:0}
         <div id="zonasBox" class="zonas"></div>
         <button type="button" class="btn btn-borde btn-sm" id="addZona" style="margin-top:8px">+ Agregar zona</button>
 
+        <h3 class="seccion">Foto impresa en la tarjeta</h3>
+        <label class="check"><input type="checkbox" id="aFotoTarjetaActiva"> 📷 Ofrecer al cliente una foto impresa en la tarjeta</label>
+        <label class="c" style="max-width:260px;margin-top:8px">Precio de la foto<input id="aFotoTarjetaPrecio" inputmode="numeric" placeholder="Ej: 5.000"></label>
+
         <h3 class="seccion">Medios de pago</h3>
         <p class="ayuda">Agrega, cambia o quita los medios de pago. En "Datos" escribe lo que verá el cliente: número de cuenta, a nombre de quién, llave Bre-B, etc. Si se llama "Efectivo", se le pregunta con cuánto paga.</p>
         <div id="pagosInfoBox" style="display:flex;flex-direction:column;gap:8px"></div>
@@ -1057,6 +1061,8 @@ table.t tr:last-child td{border-bottom:0}
         <pre>${esc(p.productos)}</pre>
         ${p.mensaje?`<div class="dato"><b>Tarjeta:</b> <i>${esc(p.mensaje)}</i></div>`:''}
         ${p.notas?`<div class="dato"><b>Notas:</b> ${esc(p.notas)}</div>`:''}
+        ${p.fotoTarjeta ? `<a class="comp" style="background:#fff8d6" href="${esc(p.fotoTarjeta)}" target="_blank" rel="noopener"><img src="${esc(p.fotoTarjeta)}" alt="Foto para la tarjeta"><span><b>📷 Foto para imprimir en la tarjeta</b><br>Toca para abrirla y descargarla</span></a>`
+          : (/Foto impresa en la tarjeta/.test(p.productos||'') ? `<div class="dato" style="color:var(--warn)"><b style="color:var(--warn)">📷 Foto en tarjeta:</b> el cliente la envía por WhatsApp</div>` : '')}
         ${p.comprobante ? `<a class="comp" href="${esc(p.comprobante)}" target="_blank" rel="noopener"><img src="${esc(p.comprobante)}" alt="Comprobante de pago"><span><b>📎 Comprobante de pago</b><br>Toca para verlo en grande</span></a>`
           : (!DN.esEfectivo(p.pago) && p.estado === 'Pendiente' ? `<div class="dato" style="color:var(--warn)"><b style="color:var(--warn)">Pago:</b> revisa el comprobante en WhatsApp antes de confirmar</div>` : '')}
         <label class="domi"><b style="color:var(--muted)">Domicilio $</b><input type="text" inputmode="numeric" data-domi="${esc(p.id)}" value="${p.domicilio ? Number(p.domicilio).toLocaleString('es-CO') : ''}" placeholder="0">
@@ -1182,6 +1188,7 @@ table.t tr:last-child td{border-bottom:0}
   function pintarZonasAj(){ const Z = DN.zonas(DATA.config); $('#zonasBox').innerHTML = Z.map(filaZona).join('') || '<p class="ayuda" style="margin:0">Sin zonas: el cliente no verá valor de domicilio al pedir.</p>'; }
   $('#addZona').addEventListener('click', () => { const p = $('#zonasBox p'); if (p) p.remove(); $('#zonasBox').insertAdjacentHTML('beforeend', filaZona({})); $('#zonasBox .zona:last-child input').focus(); });
   $('#zonasBox').addEventListener('click', e => { if (e.target.closest('[data-qzona]')) e.target.closest('.zona').remove(); });
+  $('#aFotoTarjetaPrecio').addEventListener('input', e => { const n = Number(e.target.value.replace(/\D/g,'')); e.target.value = n ? n.toLocaleString('es-CO') : ''; });
   $('#zonasBox').addEventListener('input', e => { if (e.target.dataset.zv !== undefined) { const n = Number(e.target.value.replace(/\D/g,'')); e.target.value = n ? n.toLocaleString('es-CO') : ''; } });
   function pintarAjustes(){
     const c = DATA.config;
@@ -1189,6 +1196,8 @@ table.t tr:last-child td{border-bottom:0}
     CAMPOS.forEach(k => { $(idCampo(k)).value = c[k] || ''; });
     pintarPagosInfo();
     $('#aAvisoCorreo').checked = String(c.avisoCorreo) !== 'no';
+    $('#aFotoTarjetaActiva').checked = String(c.fotoTarjetaActiva || 'si') !== 'no';
+    $('#aFotoTarjetaPrecio').value = Number(c.fotoTarjetaPrecio||0) ? Number(c.fotoTarjetaPrecio).toLocaleString('es-CO') : '';
     $('#bannerPrev').src = c.banner || 'banner.jpg';
     const link = DN.base(), nom = c.nombre || 'Dulcenata';
     $('#linkTienda').value = link;
@@ -1205,6 +1214,8 @@ table.t tr:last-child td{border-bottom:0}
     cfg.pagos = medios.join(', ');
     cfg.pagosInfo = JSON.stringify(pinfo);
     cfg.avisoCorreo = $('#aAvisoCorreo').checked ? 'si' : 'no';
+    cfg.fotoTarjetaActiva = $('#aFotoTarjetaActiva').checked ? 'si' : 'no';
+    cfg.fotoTarjetaPrecio = Number($('#aFotoTarjetaPrecio').value.replace(/\D/g,'')) || 0;
     cfg.zonas = JSON.stringify([...document.querySelectorAll('#zonasBox .zona')].map(r => ({ nombre: r.querySelector('[data-zn]').value.trim(), valor: Number(r.querySelector('[data-zv]').value.replace(/\D/g,'')) || 0 })).filter(z => z.nombre));
     const btn = $('#btnAjustes'); ocupado(btn, true, 'Guardando…');
     try { await DN.guardarConfig(PIN, cfg); DATA.config = Object.assign({}, DATA.config, cfg); pintarAjustes(); toast('Ajustes guardados'); }
