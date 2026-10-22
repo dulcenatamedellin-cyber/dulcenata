@@ -566,8 +566,8 @@ label.campo small{font-weight:600;color:var(--muted)}
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js"></script>
-<script src="api.js"></script>
+<script src="config.js?v=20261021b"></script>
+<script src="api.js?v=20261021b"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s);
@@ -912,14 +912,16 @@ label.campo small{font-weight:600;color:var(--muted)}
     if (!carrito.length) return;
     const adics = PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado');
     const yaTiene = carrito.some(i => { const p = PRODUCTOS.find(x=>x.id===i.id); return p && DN.esAdicion(p); });
-    // Se pregunta SIEMPRE al tocar "Continuar", salvo que ya lleve alguna adición
-    if (!adics.length || yaTiene) { abrirDatos(); return; }
+    // Se pregunta SIEMPRE al tocar "Continuar" (si ya lleva adiciones, se le muestran marcadas)
+    if (!adics.length) { abrirDatos(); return; }
     adicMostrada = true;
-    $('#adicOk').hidden = true; $('#adicTitulo').textContent = '¿Le agregamos algo más? 🎈';
+    $('#adicOk').hidden = true;
+    $('#adicTitulo').textContent = yaTiene ? '¿Quieres agregar algo más? 🎈' : '¿Le agregamos algo más? 🎈';
+    $('#adicSub').textContent = yaTiene ? 'Las que ya llevas están marcadas en verde. Toca otra o continúa:' : 'Toca la adición que quieras para agregarla a tu detalle:';
     pintarListaAdic(); verVistaAdic('lista');
     $('#adicFoto').hidden = !(fotoActiva());
     $('#adicFoto').textContent = '📷 ¿Sabías que también podemos imprimir una foto en la tarjeta' + (precioFoto() ? ' por solo ' + pesos(precioFoto()) : '') + '? Lo eliges en el siguiente paso.';
-    $('#adicSeguir').textContent = 'No, gracias. Continuar';
+    $('#adicSeguir').textContent = yaTiene ? 'Continuar con mi pedido' : 'No, gracias. Continuar';
     cerrarTodo(); abrir('#mAdic');
   }
   function adicionesDisp(){ return PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado'); }
