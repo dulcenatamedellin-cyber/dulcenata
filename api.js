@@ -110,7 +110,8 @@
       if (typeof z === 'string') { try { z = JSON.parse(z); } catch (e) { z = []; } }
       return Array.isArray(z) ? z.filter(x => x && x.nombre).map(x => ({ nombre: String(x.nombre), valor: Number(x.valor) || 0 })) : [];
     },
-    esAdicionCat(c) { return /^adici[oó]n(es)?$/i.test(String(c || '').trim()); },
+    // Cuenta como adición cualquier categoría que se llame Adición/Adiciones/Adicionales/Complementos/Extras
+    esAdicionCat(c) { return /^(adici[oó]n(es)?|adicional(es)?|complementos?|extras?)$/i.test(String(c || '').trim()); },
     esAdicion(p) { return DN.esAdicionCat(p && p.categoria); },
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 

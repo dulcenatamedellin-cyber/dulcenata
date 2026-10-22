@@ -912,7 +912,8 @@ label.campo small{font-weight:600;color:var(--muted)}
     if (!carrito.length) return;
     const adics = PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado');
     const yaTiene = carrito.some(i => { const p = PRODUCTOS.find(x=>x.id===i.id); return p && DN.esAdicion(p); });
-    if (!adics.length || yaTiene || adicMostrada) { abrirDatos(); return; }
+    // Se pregunta SIEMPRE al tocar "Continuar", salvo que ya lleve alguna adición
+    if (!adics.length || yaTiene) { abrirDatos(); return; }
     adicMostrada = true;
     $('#adicOk').hidden = true; $('#adicTitulo').textContent = '¿Le agregamos algo más? 🎈';
     pintarListaAdic(); verVistaAdic('lista');
