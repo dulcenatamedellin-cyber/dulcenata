@@ -7,7 +7,7 @@
   const CFG = window.DULCENATA_CONFIG || {};
   const API = (CFG.API_URL || '').trim();
   const DEMO = !API;
-  const LS_KEY = 'dulcenata_demo_v6';
+  const LS_KEY = 'dulcenata_demo_v7';
 
   // ---------- Imagen de ejemplo (SVG) ----------
   function placeholder(emoji, c1, c2) {
@@ -39,6 +39,9 @@
     resenas: [
       { id: 'r1', fecha: hace(30), nombre: 'Valentina (ejemplo)', estrellas: 5, texto: 'El desayuno llegó puntual y hermoso, mi mamá lloró de la emoción. ¡Gracias!', producto: 'Desayuno sorpresa clásico', estado: 'aprobada', respuesta: '¡Gracias Valentina! Fue un placer ser parte de ese momento 💖' },
       { id: 'r2', fecha: hace(80), nombre: 'Julián (ejemplo)', estrellas: 5, texto: 'Excelente atención por WhatsApp y la ancheta muy completa.', producto: 'Ancheta dulce', estado: 'aprobada', respuesta: '' },
+      { id: 'r4', fecha: hace(120), nombre: 'Camilo (ejemplo)', estrellas: 5, texto: 'Pedí las fresas con chocolate para mi novia y quedaron divinas. Repetiré.', producto: 'Caja de fresas con chocolate', estado: 'aprobada', respuesta: '' },
+      { id: 'r5', fecha: hace(150), nombre: 'Daniela (ejemplo)', estrellas: 5, texto: 'Todo muy bien presentado y la tarjeta con foto quedó preciosa.', producto: '', estado: 'aprobada', respuesta: '¡Gracias Dani! 💖' },
+      { id: 'r6', fecha: hace(200), nombre: 'Mateo (ejemplo)', estrellas: 4, texto: 'Buen servicio y entrega a tiempo en Envigado.', producto: 'Desayuno premium con globo', estado: 'aprobada', respuesta: '' },
       { id: 'r3', fecha: hace(2), nombre: 'Sara (ejemplo)', estrellas: 4, texto: 'Muy lindo todo, el globo podría ser un poquito más grande.', producto: '', estado: 'pendiente', respuesta: '' }
     ],
     pedidos: [
