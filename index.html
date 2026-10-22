@@ -187,6 +187,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .foto-tarj .opc label{display:flex;align-items:center;gap:6px;border:2px solid var(--line);background:var(--card);border-radius:999px;padding:6px 12px;font-weight:700;font-size:.85rem;cursor:pointer}
 .foto-tarj .opc label:has(input:checked){border-color:var(--rosa);background:var(--rosa-suave)}
 .foto-tarj img{width:80px;height:80px;border-radius:10px;object-fit:cover}
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
 .vacio{grid-column:1/-1;text-align:center;padding:50px 20px;color:var(--muted)}
 .esqueleto{aspect-ratio:.72;border-radius:20px;background:linear-gradient(90deg,var(--line),var(--rosa-suave),var(--line));background-size:200% 100%;animation:brillo 1.2s infinite}
 @keyframes brillo{to{background-position:-200% 0}}
@@ -434,6 +435,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   <div class="modal-caja">
     <button class="x" data-cerrar aria-label="Cerrar">✕</button>
     <form class="form" id="formPedido">
+      <input type="text" class="hp" id="hpPedido" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="No llenar">
       <h3>Datos de entrega</h3>
       <label class="campo">Tu nombre *<input id="fNombre" required autocomplete="name" placeholder="Ej: Laura Gómez"></label>
       <label class="campo">Tu celular *<input id="fTel" required type="tel" inputmode="numeric" autocomplete="tel" placeholder="Ej: 300 123 4567"></label>
@@ -527,6 +529,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   <div class="modal-caja" style="width:min(520px,100%)">
     <button class="x" data-cerrar aria-label="Cerrar">✕</button>
     <form class="form" id="formResena" style="grid-template-columns:1fr">
+      <input type="text" class="hp" id="hpResena" tabindex="-1" autocomplete="off" aria-hidden="true" placeholder="No llenar">
       <h3>Cuéntanos tu experiencia</h3>
       <div class="campo"><span style="font-weight:700;font-size:.9rem">¿Cuántas estrellas nos das?</span>
         <div class="star-pick" id="starPick" role="radiogroup" aria-label="Calificación"></div></div>
@@ -783,7 +786,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     e.preventDefault();
     const b = $('#btnEnviarRes'); b.disabled = true; b.textContent = 'Enviando…';
     try {
-      await DN.crearResena({ nombre: $('#rNombre').value.trim(), estrellas: estrellasSel, texto: $('#rTexto').value.trim(), producto: $('#rProducto').value });
+      await DN.crearResena({ hp: $('#hpResena').value || undefined, nombre: $('#rNombre').value.trim(), estrellas: estrellasSel, texto: $('#rTexto').value.trim(), producto: $('#rProducto').value });
       e.target.reset(); $('#formResena').hidden = true; $('#resGracias').hidden = false;
     } catch(err){ toast('No se pudo enviar: ' + err.message); }
     finally { b.disabled = false; b.textContent = 'Publicar reseña'; }
@@ -1000,6 +1003,7 @@ label.campo small{font-weight:600;color:var(--muted)}
     if (conFoto && modoFoto === 'subir' && !fotoTarjData) { toast('Sube la foto para la tarjeta o elige "La envío por WhatsApp"'); $('#fFotoTarjArch').closest('label').focus(); return; }
     const lineaFoto = conFoto ? `\n1 x Foto impresa en la tarjeta (${pesos(precioFoto())})` : '';
     const pedido = {
+      hp: $('#hpPedido').value || undefined,
       comprobanteData: compData || undefined,
       fotoTarjetaData: conFoto && modoFoto === 'subir' ? fotoTarjData : undefined,
       zona: zona ? zona.nombre : '', domicilio: dom,

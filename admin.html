@@ -44,7 +44,7 @@ h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balanc
 .login{min-height:100vh;display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));background:radial-gradient(circle at 20% 10%,var(--rosa-suave),transparent 60%),var(--bg)}
 .login-caja{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:32px 28px;width:min(380px,100%);text-align:center;display:flex;flex-direction:column;gap:14px;box-shadow:0 20px 50px -24px rgba(156,17,80,.35)}
 .login-caja img{width:96px;height:96px;border-radius:50%;margin:0 auto;box-shadow:0 0 0 4px var(--sol)}
-.login-caja input{text-align:center;font-size:1.6rem;letter-spacing:.5em;padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);outline:none}
+.login-caja input{text-align:center;font-size:1.2rem;letter-spacing:.12em;padding:12px;border-radius:14px;border:2px solid var(--line);background:var(--bg);outline:none}
 .login-caja input:focus{border-color:var(--rosa)}
 .error{color:var(--bad);font-weight:700;font-size:.9rem;min-height:1.2em;margin:0}
 .pista{font-size:.82rem;color:var(--muted);background:var(--warn-bg);border-radius:10px;padding:8px}
@@ -274,8 +274,8 @@ table.t tr:last-child td{border-bottom:0}
   <form class="login-caja" id="fLogin">
     <img src="logo.jpg" alt="Dulcenata">
     <h2>Panel de la tienda</h2>
-    <p style="margin:0;color:var(--muted)">Escribe tu PIN para administrar productos y pedidos.</p>
-    <input id="pin" type="password" inputmode="numeric" autocomplete="current-password" placeholder="••••" required aria-label="PIN">
+    <p style="margin:0;color:var(--muted)">Escribe tu clave para administrar productos y pedidos.</p>
+    <input id="pin" type="password" autocomplete="current-password" placeholder="Tu clave" required aria-label="Clave del panel" autocapitalize="off" spellcheck="false">
     <p class="error" id="errLogin"></p>
     <button class="btn btn-rosa" id="btnLogin" type="submit">Entrar</button>
     <p class="pista" id="pistaDemo" hidden>Modo demostración · PIN: <b>1234</b></p>
@@ -557,7 +557,7 @@ table.t tr:last-child td{border-bottom:0}
       if (DN.DEMO) { $('#avisoDemo').hidden = false; $('#cajaDemo').hidden = false; }
       await cargar();
     } catch(err) {
-      if (!silencioso) $('#errLogin').textContent = err.message === 'PIN incorrecto' ? 'PIN incorrecto. Inténtalo otra vez.' : 'No hay conexión con la hoja de Google. Revisa la URL en config.js.';
+      if (!silencioso) $('#errLogin').textContent = err.message === 'PIN incorrecto' ? 'Clave incorrecta. Inténtalo otra vez.' : /bloqueado/i.test(err.message) ? '🔒 ' + err.message : 'No hay conexión con la hoja de Google. Revisa la URL en config.js.';
       try { sessionStorage.removeItem('dn_pin'); } catch(e){}
     } finally { ocupado(b, false, 'Entrar'); }
   }
