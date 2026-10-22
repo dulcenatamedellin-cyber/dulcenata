@@ -566,8 +566,8 @@ label.campo small{font-weight:600;color:var(--muted)}
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js?v=20261021b"></script>
-<script src="api.js?v=20261021b"></script>
+<script src="config.js?v=20261021c"></script>
+<script src="api.js?v=20261021c"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s);
@@ -580,7 +580,7 @@ label.campo small{font-weight:600;color:var(--muted)}
   try { carrito = JSON.parse(localStorage.getItem(LS) || '[]'); } catch(e) { carrito = []; }
   const guardar = () => { try { localStorage.setItem(LS, JSON.stringify(carrito)); } catch(e){} };
 
-  const waNum = () => String(CFG.whatsapp || '').replace(/\D/g, '');
+  const waNum = () => DN.waTienda(CFG);   // agrega el 57 si el número quedó sin él
   const waLink = txt => 'https://wa.me/' + waNum() + (txt ? '?text=' + encodeURIComponent(txt) : '');
 
   function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toast._t); toast._t = setTimeout(()=>el.classList.remove('on'), 2200); }

@@ -128,8 +128,8 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
   <a class="btn sec" id="btnVolver" href="pedido.html">Ver estado de mi pedido</a>
 </div>
 
-<script src="config.js?v=20261021b"></script>
-<script src="api.js?v=20261021b"></script>
+<script src="config.js?v=20261021c"></script>
+<script src="api.js?v=20261021c"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s), esc = DN.esc, pesos = DN.pesos;
@@ -142,7 +142,7 @@ td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
       const p = await DN.recibo(tel, id), c = p.config;
       $('#rNombre').textContent = c.nombre || 'Dulcenata';
       $('#rEslogan').textContent = c.eslogan || '';
-      const datos = [c.nit ? 'NIT/CC ' + c.nit : '', c.direccionTienda || c.ciudad || '', c.whatsapp ? 'WhatsApp +' + String(c.whatsapp).replace(/\D/g,'') : '', c.correo || '', c.instagram ? '@' + String(c.instagram).replace('@','') : ''].filter(Boolean);
+      const datos = [c.nit ? 'NIT/CC ' + c.nit : '', c.direccionTienda || c.ciudad || '', c.whatsapp ? 'WhatsApp +' + DN.waTienda(c) : '', c.correo || '', c.instagram ? '@' + String(c.instagram).replace('@','') : ''].filter(Boolean);
       $('#rDatos').innerHTML = datos.map(d => `<span>${esc(d)}</span>`).join('');
       $('#rNum').textContent = p.id;
       const fecha = p.fecha ? new Date(p.fecha).toLocaleString('es-CO',{day:'numeric',month:'long',year:'numeric',hour:'numeric',minute:'2-digit'}) : '';

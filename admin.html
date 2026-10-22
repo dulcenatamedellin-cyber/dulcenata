@@ -527,8 +527,8 @@ table.t tr:last-child td{border-bottom:0}
 
 <div class="toast" id="toast"></div>
 
-<script src="config.js?v=20261021b"></script>
-<script src="api.js?v=20261021b"></script>
+<script src="config.js?v=20261021c"></script>
+<script src="api.js?v=20261021c"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s);
@@ -1207,7 +1207,7 @@ table.t tr:last-child td{border-bottom:0}
   $('#fAjustes').addEventListener('submit', async e => {
     e.preventDefault();
     const cfg = {}; CAMPOS.forEach(k => cfg[k] = $(idCampo(k)).value.trim());
-    cfg.whatsapp = cfg.whatsapp.replace(/\D/g,''); cfg.instagram = cfg.instagram.replace('@','');
+    cfg.whatsapp = DN.telWa(cfg.whatsapp); cfg.instagram = cfg.instagram.replace('@','');
     const pinfo = {}, medios = [];
     document.querySelectorAll('#pagosInfoBox .pago-f').forEach(r => { const n = r.querySelector('[data-pn]').value.trim().replace(/,/g,' '); if (n) { medios.push(n); pinfo[n] = r.querySelector('[data-pd]').value.trim(); } });
     if (!medios.length) { toast('Agrega al menos un medio de pago'); return; }

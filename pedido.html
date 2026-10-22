@@ -109,8 +109,8 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
   </div>
 </div>
 
-<script src="config.js?v=20261021b"></script>
-<script src="api.js?v=20261021b"></script>
+<script src="config.js?v=20261021c"></script>
+<script src="api.js?v=20261021c"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s), esc = DN.esc;
@@ -170,7 +170,7 @@ h1,h2{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
     $('#lnkRecibo').hidden = !conRecibo;
     $('#lnkResena').hidden = p.estado !== 'Entregado';
     if (conRecibo) $('#lnkRecibo').href = DN.base() + 'recibo.html#' + tel + '-' + p.id;
-    $('#wa').href = 'https://wa.me/' + String(c.whatsapp||'').replace(/\D/g,'') + '?text=' + encodeURIComponent('Hola, quiero preguntar por mi pedido (' + p.id + ', celular ' + bonito(tel) + ')');
+    $('#wa').href = 'https://wa.me/' + DN.waTienda(c) + '?text=' + encodeURIComponent('Hola, quiero preguntar por mi pedido (' + p.id + ', celular ' + bonito(tel) + ')');
     document.title = 'Mi pedido · ' + p.estado;
   }
 

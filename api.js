@@ -111,7 +111,9 @@
       return Array.isArray(z) ? z.filter(x => x && x.nombre).map(x => ({ nombre: String(x.nombre), valor: Number(x.valor) || 0 })) : [];
     },
     // Cuenta como adición cualquier categoría que se llame Adición/Adiciones/Adicionales/Complementos/Extras
-    esAdicionCat(c) { return /^(adici[oó]n(es)?|adicional(es)?|complementos?|extras?)$/i.test(String(c || '').trim()); },
+    // Cuenta como adición cualquier categoría cuyo nombre contenga: adición, adiciones, adicional, complemento o extra
+    // (ej: "Adiciones", "Adiciones para tu detalle", "Complementos", "Extras")
+    esAdicionCat(c) { return /adici[oó]n|adicional|complement|extra/i.test(String(c || '')); },
     esAdicion(p) { return DN.esAdicionCat(p && p.categoria); },
     esEfectivo(medio) { return /efectivo/i.test(medio || ''); },
 
@@ -299,6 +301,7 @@
     // ----- Utilidades -----
     pesos(n) { return '$' + Number(n || 0).toLocaleString('es-CO'); },
     esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); },
+    waTienda(c) { return DN.telWa((c || {}).whatsapp); },   // WhatsApp de la tienda con 57 adelante si falta
     telWa(t) { const d = String(t || '').replace(/\D/g, ''); return d.length === 10 ? '57' + d : d; },
     // Dirección base del sitio (carpeta donde están index.html, admin.html, pedido.html)
     base() { return location.href.split('#')[0].split('?')[0].replace(/[^/]*$/, ''); },
