@@ -7,7 +7,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <meta name="color-scheme" content="light only">
 <meta name="description" content="Dulcenata: desayunos sorpresa, anchetas, globos y detalles personalizados. Pide en línea y confirma por WhatsApp.">
-<meta name="theme-color" content="#d81b70">
+<meta name="theme-color" content="#fbe3d7">
 <!-- Al publicar, cambia "logo.jpg" por la dirección completa, ej: https://dulcenata.github.io/logo.jpg -->
 <meta property="og:title" content="Dulcenata · Regalos y detalles">
 <meta property="og:description" content="Desayunos sorpresa, anchetas, globos y detalles personalizados. Haz tu pedido aquí.">
@@ -20,9 +20,9 @@
 <style>
 /* Layout: tienda de regalo de una sola columna — cabecera pegajosa, banner de la marca, filtros, cuadrícula de 2 columnas en celular. */
 :root{
-  --rosa:#d81b70; --rosa-hondo:#9c1150; --rosa-suave:#fde3ee; --sol:#ffd60a;
-  --bg:#fff8fb; --card:#ffffff; --fg:#2b1420; --muted:#7c5b6b; --line:#f2dbe6;
-  --ok:#1f9d55; --wa:#25d366; --sombra:0 10px 30px -12px rgba(156,17,80,.28);
+  --rosa:#573729; --rosa-hondo:#4a2f24; --rosa-suave:#fbe3d7; --sol:#d3b488; --rosado:#f7c6c9; --crema:#faf1e4; --acento:#b58575;
+  --bg:#fcf4ef; --card:#ffffff; --fg:#4a2f24; --muted:#8a7062; --line:#f0dcd1;
+  --ok:#1f9d55; --wa:#25d366; --sombra:0 10px 30px -14px rgba(87,55,41,.28);
   --f-display:'Fraunces', Georgia, 'Times New Roman', serif;
   --f-body:'Nunito', system-ui, -apple-system, 'Segoe UI', sans-serif;
 }
@@ -45,7 +45,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .top .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
 .marca{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit;min-width:0}
 .marca img{width:46px;height:46px;border-radius:50%;box-shadow:0 0 0 3px var(--sol)}
-.marca b{font-family:var(--f-display);font-style:italic;font-size:1.45rem;color:var(--rosa);letter-spacing:-.01em}
+.marca b{font-family:var(--f-display);font-style:italic;font-size:1.45rem;color:#c2a073;letter-spacing:-.01em}
 .marca small{display:block;font-size:.72rem;color:var(--muted);font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .top .spacer{flex:1}
 .btn-carrito{position:relative;display:flex;align-items:center;gap:8px;background:var(--rosa);color:#fff;border:0;border-radius:999px;padding:10px 16px;font-weight:800}
@@ -77,7 +77,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .catalogo{padding-block:30px 60px}
 .cat-head{display:flex;align-items:end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
 .cat-head h2{font-size:clamp(1.7rem,3.6vw,2.4rem)}
-.cat-head h2 i{color:var(--rosa)}
+.cat-head h2 i{color:var(--acento)}
 .buscar{position:relative;flex:1;max-width:340px;min-width:200px}
 .buscar input{width:100%;padding:12px 16px 12px 42px;border-radius:999px;border:2px solid var(--line);background:var(--card);outline:none}
 .buscar input:focus{border-color:var(--rosa)}
@@ -95,10 +95,10 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .card .foto img{width:100%;height:100%;object-fit:cover;transition:transform .4s}
 .card:hover .foto img{transform:scale(1.05)}
 .tag{position:absolute;top:10px;left:10px;background:var(--sol);color:#2b1420;font-weight:800;font-size:.72rem;letter-spacing:.04em;text-transform:uppercase;padding:4px 10px;border-radius:999px}
-.tag.oferta{background:var(--rosa);color:#fff}
+.tag.oferta{background:var(--rosado);color:var(--rosa)}
 .agotado-velo{position:absolute;inset:0;background:rgba(30,10,20,.55);display:grid;place-items:center;color:#fff;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
 .card .info{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1;min-width:0}
-.card .cat{font-size:.72rem;font-weight:800;color:var(--rosa);letter-spacing:.06em;text-transform:uppercase}
+.card .cat{font-size:.72rem;font-weight:800;color:var(--acento);letter-spacing:.06em;text-transform:uppercase}
 .card h3{font-family:var(--f-body);font-weight:800;font-size:1.05rem;line-height:1.25}
 .card .desc{color:var(--muted);font-size:.88rem;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .card .pie{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:auto;padding-top:8px}
@@ -123,7 +123,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .resenas{padding-block:10px 60px}
 .res-head{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin-bottom:16px}
 .res-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem)}
-.res-head h2 i{color:var(--rosa)}
+.res-head h2 i{color:var(--acento)}
 .promedio{display:flex;align-items:center;gap:10px;color:var(--muted);font-weight:700}
 .promedio b{font-family:var(--f-display);font-size:2rem;color:var(--fg)}
 .estrellas{color:#f5a623;letter-spacing:2px}
@@ -140,9 +140,9 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .star-pick{display:flex;gap:4px}
 .star-pick button{border:0;background:none;font-size:2rem;line-height:1;color:var(--line);padding:0 2px}
 .star-pick button.on{color:#f5a623}
-.chip.adic{border-color:var(--sol);background:#fff8d6;color:#7a5b00}
+.chip.adic{border-color:var(--sol);background:var(--crema);color:var(--rosa)}
 .chip.adic.on{background:var(--sol);border-color:var(--sol);color:#2b1420}
-.tira-adic{grid-column:1/-1;display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,#fff8d6,var(--rosa-suave));border:2px dashed var(--sol);border-radius:18px;padding:14px 16px;flex-wrap:wrap}
+.tira-adic{grid-column:1/-1;display:flex;align-items:center;gap:14px;background:linear-gradient(120deg,var(--crema),var(--rosado));border:2px dashed var(--sol);border-radius:18px;padding:14px 16px;flex-wrap:wrap}
 .tira-adic .ico{font-size:2rem}
 .tira-adic div{flex:1;min-width:180px}
 .tira-adic b{display:block;font-size:1.02rem}
@@ -153,9 +153,23 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;line-height:1.1;margin:0
 .adic-item div{padding:8px 10px;display:flex;flex-direction:column;gap:4px;flex:1}
 .adic-item b{font-size:.85rem;line-height:1.2}
 .adic-item .pr{font-weight:800;color:var(--rosa);font-size:.9rem}
-.adic-item button{margin-top:auto;border:0;border-radius:10px;background:var(--rosa);color:#fff;font-weight:800;padding:7px;font-size:.82rem}
-.adic-item button.ok{background:var(--ok);}
-.foto-tarj{background:#fff8d6;border:1px solid #f5e08a;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.adic-item{border:2px solid var(--line);padding:0;text-align:left;cursor:pointer;position:relative;transition:transform .15s,border-color .15s;font:inherit;color:inherit}
+.adic-item:hover{transform:translateY(-3px);border-color:var(--rosa)}
+.adic-item.ya{border-color:var(--ok)}
+.adic-item .cta{margin-top:auto;border-radius:10px;background:var(--rosa);color:#fff;font-weight:800;padding:7px;font-size:.82rem;text-align:center}
+.adic-item.ya .cta{background:var(--ok)}
+.adic-item .lleva{position:absolute;top:8px;left:8px;background:var(--ok);color:#fff;font-weight:800;font-size:.72rem;padding:3px 8px;border-radius:999px}
+.adic-ok{background:var(--ok-bg,#dcfce7);color:#15803d;border-radius:12px;padding:10px 12px;font-weight:700;font-size:.92rem}
+.adic-pick{display:grid;grid-template-columns:120px 1fr;gap:14px;align-items:start}
+.adic-pick img{width:120px;height:120px;border-radius:14px;object-fit:cover}
+.adic-pick .d{display:flex;flex-direction:column;gap:8px;min-width:0}
+.adic-pick h4{margin:0;font-family:var(--f-display);font-size:1.25rem;padding-right:40px;overflow-wrap:anywhere}
+.adic-pick .pr{font-weight:800;color:var(--rosa);font-size:1.1rem}
+.adic-pick .swatches{gap:6px}
+.adic-pick .sw{width:58px}
+.adic-pick .sw span{width:32px;height:32px}
+@media (max-width:480px){ .adic-pick{grid-template-columns:90px 1fr} .adic-pick img{width:90px;height:90px} }
+.foto-tarj{background:var(--crema);border:1px solid var(--sol);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
 .foto-tarj .check{display:flex;gap:10px;align-items:flex-start;font-weight:700;cursor:pointer}
 .foto-tarj .check input{width:20px;height:20px;accent-color:var(--rosa);flex:none;margin-top:2px}
 .foto-tarj .opc{display:flex;gap:8px;flex-wrap:wrap}
@@ -260,7 +274,7 @@ label.campo small{font-weight:600;color:var(--muted)}
 
 .toast{position:fixed;left:50%;top:calc(76px + env(safe-area-inset-top,0px));transform:translate(-50%,-12px);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:12px;font-weight:700;font-size:.88rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:var(--sombra);z-index:100;opacity:0;transition:all .25s;pointer-events:none;max-width:calc(100% - 32px);text-align:center}
 .toast.on{opacity:1;transform:translate(-50%,0)}
-.demo{background:var(--sol);color:#2b1420;text-align:center;font-size:.85rem;font-weight:700;padding:6px 12px}
+.demo{background:var(--rosa-suave);color:#968072;letter-spacing:.06em;text-align:center;font-size:.85rem;font-weight:700;padding:6px 12px}
 
 /* ---------- Responsive ---------- */
 @media (max-width:820px){
@@ -470,13 +484,23 @@ label.campo small{font-weight:600;color:var(--muted)}
   <div class="modal-caja" style="width:min(620px,100%)">
     <button class="x" data-cerrar aria-label="Cerrar">✕</button>
     <div style="padding:24px 20px 20px;display:flex;flex-direction:column;gap:12px">
-      <h3 style="font-size:1.5rem">¿Le agregamos algo más? 🎈</h3>
-      <p style="margin:0;color:var(--muted)">Haz tu detalle todavía más especial con nuestras adiciones:</p>
-      <div class="adic-lista" id="adicLista"></div>
-      <p id="adicFoto" class="nota" style="margin:0" hidden></p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <button class="btn btn-borde" id="adicVer" style="flex:1">Ver todas las adiciones</button>
-        <button class="btn btn-rosa" id="adicSeguir" style="flex:1">No, gracias. Continuar</button>
+      <div id="adicVLista" style="display:flex;flex-direction:column;gap:12px">
+        <h3 style="font-size:1.5rem" id="adicTitulo">¿Le agregamos algo más? 🎈</h3>
+        <div class="adic-ok" id="adicOk" hidden></div>
+        <p style="margin:0;color:var(--muted)" id="adicSub">Toca la adición que quieras para agregarla a tu detalle:</p>
+        <div class="adic-lista" id="adicLista"></div>
+        <p id="adicFoto" class="nota" style="margin:0" hidden></p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-borde" id="adicVer" style="flex:1">Ver todas las adiciones</button>
+          <button class="btn btn-rosa" id="adicSeguir" style="flex:1">No, gracias. Continuar</button>
+        </div>
+      </div>
+      <div id="adicVPick" hidden style="display:flex;flex-direction:column;gap:14px">
+        <div class="adic-pick" id="adicPick"></div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-borde" id="adicVolver" style="flex:1">← Volver</button>
+          <button class="btn btn-rosa" id="adicAgregar" style="flex:2">Agregar</button>
+        </div>
       </div>
     </div>
   </div>
@@ -594,7 +618,7 @@ label.campo small{font-weight:600;color:var(--muted)}
       (!t || (p.nombre+' '+p.descripcion+' '+p.categoria).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').includes(t)));
   }
 
-  function imgDe(p){ return p.imagen || DN.placeholder('🎁', '#ffe0ec', '#d81b70'); }
+  function imgDe(p){ return p.imagen || DN.placeholder('🎁', '#fbe3d7', '#f7c6c9'); }
 
   function pintarGrid(){
     const lista = filtrados();
@@ -607,7 +631,7 @@ label.campo small{font-weight:600;color:var(--muted)}
       const tag = p.etiqueta ? `<span class="tag ${/oferta/i.test(p.etiqueta)?'oferta':''}">${esc(p.etiqueta)}</span>` : (oferta ? `<span class="tag oferta">Oferta</span>` : '');
       return `<article class="card">
         <button class="foto" data-ver="${esc(p.id)}" aria-label="Ver ${esc(p.nombre)}">
-          <img src="${esc(imgDe(p))}" alt="${esc(p.nombre)}" loading="lazy" onerror="this.src='${DN.placeholder('🎁','#ffe0ec','#d81b70')}'">
+          <img src="${esc(imgDe(p))}" alt="${esc(p.nombre)}" loading="lazy" onerror="this.src='${DN.placeholder('🎁','#fbe3d7','#f7c6c9')}'">
           ${tag}${agot ? '<span class="agotado-velo">Agotado</span>' : ''}
         </button>
         <div class="info">
@@ -841,13 +865,53 @@ label.campo small{font-weight:600;color:var(--muted)}
     const yaTiene = carrito.some(i => { const p = PRODUCTOS.find(x=>x.id===i.id); return p && DN.esAdicion(p); });
     if (!adics.length || yaTiene || adicMostrada) { abrirDatos(); return; }
     adicMostrada = true;
-    $('#adicLista').innerHTML = adics.map(p => `<div class="adic-item"><img src="${esc(imgDe(p))}" alt=""><div><b>${esc(p.nombre)}</b><span class="pr">${pesos(p.precio)}</span>
-      <button type="button" data-adic="${esc(p.id)}">${DN.colores(p).length ? 'Elegir color' : '+ Agregar'}</button></div></div>`).join('');
+    $('#adicOk').hidden = true; $('#adicTitulo').textContent = '¿Le agregamos algo más? 🎈';
+    pintarListaAdic(); verVistaAdic('lista');
     $('#adicFoto').hidden = !(fotoActiva());
     $('#adicFoto').textContent = '📷 ¿Sabías que también podemos imprimir una foto en la tarjeta' + (precioFoto() ? ' por solo ' + pesos(precioFoto()) : '') + '? Lo eliges en el siguiente paso.';
     $('#adicSeguir').textContent = 'No, gracias. Continuar';
     cerrarTodo(); abrir('#mAdic');
   }
+  function adicionesDisp(){ return PRODUCTOS.filter(p => DN.esAdicion(p) && p.estado !== 'agotado'); }
+  function pintarListaAdic(){
+    $('#adicLista').innerHTML = adicionesDisp().map(p => {
+      const lleva = carrito.filter(i => i.id === p.id).reduce((s,i) => s + i.cantidad, 0);
+      return `<button type="button" class="adic-item ${lleva?'ya':''}" data-adic="${esc(p.id)}" aria-label="Agregar ${esc(p.nombre)}">
+        ${lleva ? `<span class="lleva">✓ ${lleva} en tu pedido</span>` : ''}
+        <img src="${esc(imgDe(p))}" alt=""><div><b>${esc(p.nombre)}</b><span class="pr">${pesos(p.precio)}</span>
+        <span class="cta">${lleva ? '+ Agregar más' : '+ Agregar'}</span></div></button>`;
+    }).join('');
+  }
+  function verVistaAdic(v){ $('#adicVLista').hidden = v !== 'lista'; $('#adicVPick').hidden = v !== 'pick'; }
+  // Selector dentro de la ventana: color (si tiene) + cantidad
+  let adicSel = null, adicCant = 1, adicColor = '';
+  function abrirPickAdic(id){
+    const p = PRODUCTOS.find(x => x.id === id); if (!p) return;
+    adicSel = p; adicCant = 1; adicColor = '';
+    const C = DN.colores(p);
+    $('#adicPick').innerHTML = `<img src="${esc(imgDe(p))}" alt="${esc(p.nombre)}">
+      <div class="d"><h4>${esc(p.nombre)}</h4><span class="pr">${pesos(p.precio)} c/u</span>
+        ${p.descripcion ? `<span style="color:var(--muted);font-size:.88rem">${esc(p.descripcion)}</span>` : ''}
+        ${C.length ? `<div class="colores"><b>${esc(p.colorTitulo || 'Color')}: <span id="adicColorSel" style="color:var(--rosa)">elige uno</span></b>
+          <div class="swatches">${C.map(c => `<button type="button" class="sw" data-asw="${esc(c.n)}"><span style="background:${esc(c.h)}"></span>${esc(c.n)}</button>`).join('')}</div></div>` : ''}
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><b style="font-size:.92rem">¿Cuántas unidades?</b>
+          <div class="stepper"><button type="button" data-acant="-1" aria-label="Menos">−</button><span id="adicCant">1</span><button type="button" data-acant="1" aria-label="Más">+</button></div></div>
+      </div>`;
+    pintarBotonAdic(); verVistaAdic('pick');
+  }
+  function pintarBotonAdic(){ $('#adicAgregar').textContent = 'Agregar ' + adicCant + ' · ' + pesos(adicSel.precio * adicCant); }
+  $('#adicVolver').addEventListener('click', () => verVistaAdic('lista'));
+  $('#adicAgregar').addEventListener('click', () => {
+    if (!adicSel) return;
+    if (DN.colores(adicSel).length && !adicColor) { toast('Elige un color'); document.querySelector('#adicPick .swatches').animate([{transform:'translateX(0)'},{transform:'translateX(-6px)'},{transform:'translateX(6px)'},{transform:'translateX(0)'}],{duration:300}); return; }
+    agregar(adicSel.id, adicCant, '', adicColor);
+    $('#adicOk').textContent = `✓ Agregaste ${adicCant} × ${adicSel.nombre}${adicColor ? ' (' + adicColor + ')' : ''}`;
+    $('#adicOk').hidden = false;
+    $('#adicTitulo').textContent = '¿Quieres agregar algo más? 🎈';
+    $('#adicSub').textContent = 'Toca otra adición o continúa con tu pedido:';
+    $('#adicSeguir').textContent = 'Continuar con mi pedido';
+    pintarListaAdic(); verVistaAdic('lista');
+  });
   $('#adicSeguir').addEventListener('click', () => abrirDatos());
   $('#adicVer').addEventListener('click', verAdiciones);
   function verAdiciones(){
@@ -935,11 +999,9 @@ label.campo small{font-weight:600;color:var(--muted)}
   document.addEventListener('click', e => {
     const t = e.target.closest('button,a,[data-cerrar]'); if (!t) { if (e.target.classList.contains('modal')) cerrarTodo(); return; }
     if (t.dataset.veradic !== undefined){ verAdiciones(); return; }
-    if (t.dataset.adic){
-      const p = PRODUCTOS.find(x=>x.id===t.dataset.adic); if (!p) return;
-      if (DN.colores(p).length) { verDetalle(p.id); return; }
-      agregar(p.id); t.textContent = '✓ Agregado'; t.classList.add('ok'); $('#adicSeguir').textContent = 'Continuar con mi pedido'; return;
-    }
+    if (t.dataset.adic){ abrirPickAdic(t.dataset.adic); return; }
+    if (t.dataset.asw !== undefined){ adicColor = t.dataset.asw; document.querySelectorAll('[data-asw]').forEach(x => x.classList.toggle('on', x === t)); $('#adicColorSel').textContent = adicColor; return; }
+    if (t.dataset.acant){ adicCant = Math.max(1, Math.min(50, adicCant + Number(t.dataset.acant))); $('#adicCant').textContent = adicCant; pintarBotonAdic(); return; }
     if (t.dataset.catfrase){
       if (t.dataset.catfrase === '__propio'){ $('#fTarjeta').value=''; $('#fTarjeta').focus(); document.querySelectorAll('.frase.on').forEach(x=>x.classList.remove('on')); return; }
       catFrase = t.dataset.catfrase; pintarFrases(); return;
